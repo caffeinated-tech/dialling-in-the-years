@@ -8,7 +8,7 @@
 //
 //  Components: 
 //  -  https://wiki.dfrobot.com/dfplayer_mini_sku_dfr0299
-//  -  
+//  -  https://github.com/Seeed-Studio/Grove_LCD_RGB_Backlight
 //
 //
 // ------------------------------------------------------------------------------------
@@ -58,6 +58,35 @@ int pulsesUnder30 = 0;
 String topLine = "";
 String bottomLine = "";
 
+// used for scrolling long song name/artist texts oer the bottom lcd line.
+int timeSinceLastScroll = -1000;
+int scrollDelay = 1000;
+int scrollOffset = 0;
+// we only have songs from 1956 to 2000
+// songs are stored under the year.mp3 files
+// here are the corresponding song titles and artists to display.
+int currentSong = 0;
+char currentSongText[50];
+size_t currentSongTextLength;
+int offset = 1956;
+
+// song titles take up too much space for memory, so had to follow this guide
+// read this: https://docs.arduino.cc/language-reference/en/variables/utilities/PROGMEM/
+#include <avr/pgmspace.h>
+const char clear_song[] PROGMEM = "                                                                                                    ";
+const char song_1956[] PROGMEM = "Don't be cruel - Elvis Presley   "; 
+const char song_1957[] PROGMEM = "That's be the day - Buddy Holly and the Crickets   "; 
+const char song_1958[] PROGMEM = "At the Hop - Danny and the Juniors   "; 
+const char song_1959[] PROGMEM = "La Bamba - Ritchie Valens   "; 
+const char song_1960[] PROGMEM = "The twist - Chubby Checker   "; 
+
+const char *const songTitles[] PROGMEM = {
+  song_1956,
+  song_1957,
+  song_1958,
+  song_1959,
+  song_1960, 
+};
 
 
 void setup() {
@@ -78,6 +107,7 @@ void showStartMessage() {
   lcd.clear();
   printToLCD(0, "Lift the handset");
   printToLCD(1, "to begin.");
+  Serial.println("started LCD ");
 }
 
 void loop() {
@@ -87,7 +117,7 @@ void loop() {
     myDFPlayer.read();
   }
   int phoneValue = analogRead(phoneInputPin);
-//  Serial.println(phoneValue);
+
   if (mode == "on-hook") {
     if (phoneValue <= phoneOffHookLowerThreshold) {
       timesSeenOffHook = 0;
@@ -105,6 +135,7 @@ void loop() {
   } else if (mode == "off-hook") {
       processDialler(phoneValue);
   } else if (mode == "playing") {
+    scrollSong();
     if (phoneValue == 0 ){
       timesSeenAtZero++;
       if (timesSeenAtZero > 20) {
@@ -130,17 +161,14 @@ void setVolume() {
 void processDialler(int phoneValue) {
   if (seenRisingEdgeAt == 0 && phoneValue > phoneDiallingUpperEddge) {
     timesSeenAtZero = 0;
-    seenRisingEdgeAt = millis();
-//    Serial.println("seen rising edge at " + String(seenRisingEdgeAt));
+    seenRisingEdgeAt = millis(); 
   } else if (seenRisingEdgeAt > 0) {
     timesSeenAtZero = 0;
-    if (phoneValue == 0) {
-//      Serial.println("saw a zero ");
+    if (phoneValue == 0) { 
       diallingNumber ++;
       seenRisingEdgeAt = 0;
     } else {
-      unsigned long timeSinceLastRisingEdge = millis() - seenRisingEdgeAt;
-//      Serial.println("time since last edge " + String(timeSinceLastRisingEdge));
+      unsigned long timeSinceLastRisingEdge = millis() - seenRisingEdgeAt; 
       if (diallingNumber > 0 && timeSinceLastRisingEdge > 100 ) {
         if (diallingNumber == 10) {
           diallingNumber = 0;
@@ -151,12 +179,12 @@ void processDialler(int phoneValue) {
       }
     } 
   } else if (phoneValue == 0 ){
-      timesSeenAtZero++;
-      if (timesSeenAtZero > 20) {
-        mode = "on-hook";
-        showStartMessage();
-        timesSeenAtZero = 0;
-      }
+    timesSeenAtZero++;
+    if (timesSeenAtZero > 20) {
+      mode = "on-hook";
+      showStartMessage();
+      timesSeenAtZero = 0;
+    }
   }
 }
 
@@ -172,29 +200,55 @@ void dialNumber(int number) {
 
 void playSong(String year) {
   Serial.println("Play Song from " + year);
-  int yearAsNumber = year.toInt();
-  if (yearAsNumber > 1980 && yearAsNumber < 2026) {
-      myDFPlayer.play(1);  
-      lcd.clear();
-      printToLCD(0, "Now Playing " + year);
-      printToLCD(1, "Hang up to reset");
-      mode = "playing";
-  } else if (yearAsNumber > 1110 && yearAsNumber < 1120) {
-      myDFPlayer.play(2);  
-      lcd.clear();
-      printToLCD(0, "Now Playing " + year);
-      printToLCD(1, "Hang up to reset");
-      mode = "playing";
+  currentSong = year.toInt();
+  if (currentSong > 1955 && currentSong < 1961) { 
+    Serial.println(currentSong); 
+    strcpy_P(currentSongText, clear_song);
+    strcpy_P(currentSongText, (char*)pgm_read_ptr(&(songTitles[currentSong - offset])));
+    currentSongTextLength = strlen(currentSongText);
+    Serial.println(currentSongText);
+    Serial.println(currentSongTextLength);
+    timeSinceLastScroll = -1000;
+    scrollOffset = 0;
+    lcd.clear();
+    String playing = "Now Playing "  + String(currentSong) ; 
+    Serial.println(playing);
+    printToLCD(0, playing);
+    printToLCD(1, currentSongText);
+    mode = "playing";
+    myDFPlayer.play(1);  
   } else {
     mode = "on-hook";
   }
 }
 
 
+
 void printToLCD(int row, String text){
-  lcd.setCursor(0, row); 
-  lcd.print(text);
+  lcd.setCursor(0, row);
   lcd.print("                ");
+  lcd.setCursor(0, row);
+  lcd.print(text);
+}
+
+void scrollSong() {
+  if (currentSongTextLength < 17) {
+    return;
+  }
+  if (timeSinceLastScroll > scrollDelay) {
+    if (scrollOffset == currentSongTextLength - 16) {
+      scrollOffset = 0;
+      timeSinceLastScroll = -1000;
+    } else {
+      scrollOffset += 1; 
+    }  
+    printToLCD(1, &(currentSongText[scrollOffset]));
+    Serial.println(String(currentSongTextLength));
+    Serial.println(&(currentSongText[scrollOffset]));
+    timeSinceLastScroll = 0;
+  } else {
+    timeSinceLastScroll += 10;
+  }
 }
 
 
