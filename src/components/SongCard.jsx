@@ -1,15 +1,29 @@
+import { Card, CardContent } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+
 export default function SongCard({ song, showSubmitter = false }) {
   return (
-    <article className="song-card">
-      <div className="song-card__year">{song.year}</div>
-      <div className="song-card__body">
-        <h3 className="song-card__title">{song.title}</h3>
-        <p className="song-card__artist">{song.artist}</p>
-        {song.story && <p className="song-card__story">{song.story}</p>}
-        {showSubmitter && song.submitterName && (
-          <p className="song-card__submitter">Submitted by {song.submitterName}</p>
+    <Card className="flex gap-3 p-4 hover:border-primary transition-colors">
+      <Badge
+        variant="outline"
+        className="self-start shrink-0 text-base font-extrabold text-primary border-primary/40 px-2 py-0.5 tracking-tight"
+      >
+        {song.year}
+      </Badge>
+      <CardContent className="p-0 flex-1 min-w-0">
+        <p className="font-bold text-sm truncate">{song.title}</p>
+        <p className="text-muted-foreground text-xs mt-0.5 mb-2">{song.artist}</p>
+        {song.story && (
+          <p className="text-muted-foreground text-xs leading-relaxed line-clamp-3">
+            {song.story}
+          </p>
         )}
-      </div>
-    </article>
+        {showSubmitter && song.submitterName && (
+          <p className="text-muted-foreground text-xs mt-2 italic">
+            Submitted by {song.submitterName}
+          </p>
+        )}
+      </CardContent>
+    </Card>
   );
 }
