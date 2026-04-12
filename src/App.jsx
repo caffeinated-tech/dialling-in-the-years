@@ -7,9 +7,11 @@ import { linkUserProfile } from '@/firebase/firestore';
 import Gallery from './pages/Gallery.jsx';
 import Submit from './pages/Submit.jsx';
 import MySubmissions from './pages/MySubmissions.jsx';
+import Profile from './pages/Profile.jsx';
 import AdminLogin from './pages/AdminLogin.jsx';
 import Admin from './pages/Admin.jsx';
 import AdminGuard from './components/AdminGuard.jsx';
+import Header from './components/Header.jsx';
 import {
   Dialog,
   DialogContent,
@@ -111,10 +113,12 @@ export default function App() {
   return (
     <>
       <EmailLinkHandler />
+      <Header />
       <Routes>
         <Route path="/" element={<Gallery />} />
         <Route path="/submit" element={<Submit />} />
         <Route path="/my-submissions" element={<MySubmissions />} />
+        <Route path="/profile" element={<Profile />} />
         <Route path="/admin/login" element={<AdminLogin />} />
         <Route path="/admin" element={<AdminGuard><Admin /></AdminGuard>} />
         <Route path="*" element={<Navigate to="/" replace />} />
