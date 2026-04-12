@@ -18,6 +18,7 @@ dist-ssr
 
 # Firebase service account key — never commit this
 scripts/serviceAccountKey.json
+serviceAccountKey.json
 
 # Firebase emulator data
 .firebase/
