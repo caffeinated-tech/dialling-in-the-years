@@ -48,6 +48,8 @@ service cloud.firestore {
         && request.resource.data.year <= currentYear()
         // Email must never appear on a submission document
         && !('email' in request.resource.data)
+        // Visitors cannot self-promote — only admins can set this via update
+        && !('promoted' in request.resource.data)
         // Required fields must be present
         && request.resource.data.keys().hasAll(['year', 'title', 'artist', 'story', 'submitterName', 'uid', 'createdAt', 'visible'])
         // New submissions must default to visible

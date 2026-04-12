@@ -64,10 +64,11 @@ export async function addCuratedSong({ year, title, artist, story }) {
 
 /**
  * Promote a visitor submission to a curated song.
- * Creates a new curated_songs document from the submission's data.
- * The original submission is left untouched — the admin can hide or delete
- * it separately if needed.
+ * Creates a new curated_songs document and stamps `promoted: true` on the
+ * original submission so it can be flagged in the gallery and admin list.
+ * `promoted` can only be set via update, which is admin-only in Firestore rules.
  */
-export async function promoteSubmission({ year, title, artist, story }) {
+export async function promoteSubmission({ id, year, title, artist, story }) {
   await addCuratedSong({ year, title, artist, story });
+  await updateSubmission(id, { promoted: true });
 }

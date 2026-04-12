@@ -3,6 +3,7 @@ import { signOut } from 'firebase/auth';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
+import { Star } from 'lucide-react';
 import { toast } from 'sonner';
 import { auth } from '@/firebase/config';
 import { useAuth } from '@/hooks/useAuth';
@@ -292,7 +293,12 @@ function SubmissionsTab() {
               <TableRow key={sub.id} className={!sub.visible ? 'opacity-50' : ''}>
                 <TableCell className="font-bold text-primary">{sub.year}</TableCell>
                 <TableCell>
-                  <p className="font-medium text-sm">{sub.title}</p>
+                  <div className="flex items-center gap-1.5">
+                    {sub.promoted && (
+                      <Star className="size-3.5 fill-primary text-primary shrink-0" aria-label="Promoted to curated" />
+                    )}
+                    <p className="font-medium text-sm">{sub.title}</p>
+                  </div>
                   <p className="text-muted-foreground text-xs">{sub.artist}</p>
                 </TableCell>
                 <TableCell className="text-sm">{sub.submitterName}</TableCell>
