@@ -9,12 +9,14 @@
     "lint": "eslint .",
     "preview": "vite preview",
     "emulators": "firebase emulators:start",
-    "grant-admin": "node scripts/grant-admin.js"
+    "grant-admin": "node scripts/grant-admin.js",
+    "seed-curated": "node scripts/seed-curated.js"
   },
   "dependencies": {
     "firebase": "^12.12.0",
     "react": "^19.2.4",
-    "react-dom": "^19.2.4"
+    "react-dom": "^19.2.4",
+    "react-router-dom": "^7.14.0"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.4",
