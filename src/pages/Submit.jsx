@@ -60,10 +60,11 @@ export default function Submit() {
     return auth.onAuthStateChanged(setUser);
   }, []);
 
-  // Pre-fill email from Firebase Auth when a verified user is signed in
+  // Pre-fill email and display name from Firebase Auth when a verified user is signed in
   useEffect(() => {
     if (user?.email) form.setValue('email', user.email);
-  }, [user?.email]);
+    if (user?.displayName) form.setValue('submitterName', user.displayName);
+  }, [user?.email, user?.displayName]);
 
   // Kiosk reset: sign out anonymous user after 5 min idle, or on "Done" press
   const { resetSession } = useKioskReset(user?.isAnonymous, () => navigate('/'));
@@ -249,7 +250,13 @@ export default function Submit() {
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Your name</FormLabel>
-                <FormControl><Input placeholder="How you'd like to appear in the gallery" {...field} /></FormControl>
+                <FormControl>
+                  <Input
+                    placeholder="How you'd like to appear in the gallery"
+                    disabled={!!user?.displayName}
+                    {...field}
+                  />
+                </FormControl>
                 <FormDescription>This will be shown publicly with your submission.</FormDescription>
                 <FormMessage />
               </FormItem>
