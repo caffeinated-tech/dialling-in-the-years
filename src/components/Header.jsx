@@ -1,7 +1,8 @@
-import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { signOut } from 'firebase/auth';
 import { auth } from '@/firebase/config';
+import { useAuth } from '@/hooks/useAuth';
+import { UserRound } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import {
   DropdownMenu,
@@ -12,22 +13,9 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 
-function initials(name, email) {
-  if (name) {
-    const parts = name.trim().split(/\s+/);
-    return parts.length >= 2
-      ? (parts[0][0] + parts[parts.length - 1][0]).toUpperCase()
-      : parts[0].slice(0, 2).toUpperCase();
-  }
-  if (email) return email[0].toUpperCase();
-  return '?';
-}
-
 export default function Header() {
-  const [user, setUser] = useState(auth.currentUser);
+  const { user, isAdmin } = useAuth();
   const navigate = useNavigate();
-
-  useEffect(() => auth.onAuthStateChanged(setUser), []);
 
   const isAnonymous = !user || user.isAnonymous;
 
@@ -48,8 +36,8 @@ export default function Header() {
             <button className="rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
               <Avatar className="size-8 cursor-pointer">
                 <AvatarImage src={user?.photoURL ?? undefined} alt={user?.displayName ?? 'Profile'} />
-                <AvatarFallback className="text-xs bg-secondary text-secondary-foreground">
-                  {isAnonymous ? '?' : initials(user?.displayName, user?.email)}
+                <AvatarFallback className="bg-secondary text-secondary-foreground">
+                  <UserRound className="size-4" />
                 </AvatarFallback>
               </Avatar>
             </button>
@@ -62,6 +50,9 @@ export default function Header() {
                   Browsing as guest
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />
+                <DropdownMenuItem asChild>
+                  <Link to="/login">Sign in / create account</Link>
+                </DropdownMenuItem>
                 <DropdownMenuItem asChild>
                   <Link to="/submit">Submit a song</Link>
                 </DropdownMenuItem>
@@ -81,6 +72,14 @@ export default function Header() {
                 <DropdownMenuItem asChild>
                   <Link to="/profile">Edit profile</Link>
                 </DropdownMenuItem>
+                {isAdmin && (
+                  <>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem asChild>
+                      <Link to="/admin">Admin panel</Link>
+                    </DropdownMenuItem>
+                  </>
+                )}
                 <DropdownMenuSeparator />
                 <DropdownMenuItem
                   onClick={handleSignOut}

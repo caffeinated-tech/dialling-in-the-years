@@ -12,8 +12,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from '@/components/ui/form';
-import { sendEmailLink, linkWithGoogle } from '@/firebase/auth';
-import { linkUserProfile } from '@/firebase/firestore';
+import { sendEmailLink } from '@/firebase/auth';
 
 const schema = z.object({
   email: z.string().email('Enter a valid email address'),
@@ -32,7 +31,7 @@ const schema = z.object({
  * @param {string} anonymousUid - UID before linking, so we can update user_profiles
  */
 export default function AccountNudge({ open, onClose, anonymousUid }) {
-  const [view, setView] = useState('prompt'); // 'prompt' | 'email' | 'sent' | 'error'
+  const [view, setView] = useState('email'); // 'email' | 'sent' | 'error'
   const [errorMsg, setErrorMsg] = useState('');
 
   const form = useForm({
@@ -50,18 +49,6 @@ export default function AccountNudge({ open, onClose, anonymousUid }) {
     }
   }
 
-  async function handleGoogleLink() {
-    try {
-      const { user } = await linkWithGoogle();
-      await linkUserProfile(user.uid, anonymousUid);
-      setView('done');
-    } catch (err) {
-      if (err.code === 'auth/popup-closed-by-user') return;
-      setErrorMsg(err.message ?? 'Something went wrong. Please try again.');
-      setView('error');
-    }
-  }
-
   function handleClose() {
     form.reset();
     setView('prompt');
@@ -73,35 +60,13 @@ export default function AccountNudge({ open, onClose, anonymousUid }) {
     <Dialog open={open} onOpenChange={(o) => !o && handleClose()}>
       <DialogContent className="max-w-sm">
 
-        {view === 'prompt' && (
+        {view === 'email' && (
           <>
             <DialogHeader>
               <DialogTitle>Save your submission</DialogTitle>
               <DialogDescription>
-                Create a free account to track your submissions.
-                Your submission is already saved — this is optional.
-              </DialogDescription>
-            </DialogHeader>
-            <div className="flex flex-col gap-3 mt-2">
-              <Button onClick={handleGoogleLink} variant="outline" className="w-full">
-                Continue with Google
-              </Button>
-              <Button onClick={() => setView('email')} className="w-full">
-                Continue with email
-              </Button>
-              <Button variant="ghost" onClick={handleClose} className="w-full text-muted-foreground">
-                No thanks
-              </Button>
-            </div>
-          </>
-        )}
-
-        {view === 'email' && (
-          <>
-            <DialogHeader>
-              <DialogTitle>Sign in with email</DialogTitle>
-              <DialogDescription>
                 Enter your email and we'll send you a sign-in link — no password needed.
+                Your submission is already saved.
               </DialogDescription>
             </DialogHeader>
             <Form {...form}>
@@ -122,8 +87,8 @@ export default function AccountNudge({ open, onClose, anonymousUid }) {
                 <Button type="submit" disabled={form.formState.isSubmitting} className="w-full">
                   {form.formState.isSubmitting ? 'Sending…' : 'Send sign-in link'}
                 </Button>
-                <Button type="button" variant="ghost" onClick={() => setView('prompt')} className="w-full text-muted-foreground">
-                  Back
+                <Button type="button" variant="ghost" onClick={handleClose} className="w-full text-muted-foreground">
+                  No thanks
                 </Button>
               </form>
             </Form>
@@ -149,25 +114,13 @@ export default function AccountNudge({ open, onClose, anonymousUid }) {
           </>
         )}
 
-        {view === 'done' && (
-          <>
-            <DialogHeader>
-              <DialogTitle>Account linked</DialogTitle>
-              <DialogDescription>
-                Your submission is now linked to your account.
-              </DialogDescription>
-            </DialogHeader>
-            <Button onClick={handleClose} className="w-full mt-2">Done</Button>
-          </>
-        )}
-
         {view === 'error' && (
           <>
             <DialogHeader>
               <DialogTitle>Something went wrong</DialogTitle>
               <DialogDescription>{errorMsg}</DialogDescription>
             </DialogHeader>
-            <Button onClick={() => setView('prompt')} variant="outline" className="w-full mt-2">
+            <Button onClick={() => setView('email')} variant="outline" className="w-full mt-2">
               Try again
             </Button>
           </>

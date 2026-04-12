@@ -52,6 +52,7 @@ export function subscribeSubmissions(onChange, onError) {
  */
 export async function createSubmission({ year, title, artist, story, submitterName, email }, uid, isAnonymous) {
   // Write submission — no email field
+  const now = serverTimestamp();
   await addDoc(collection(db, 'submissions'), {
     year,
     title,
@@ -60,7 +61,8 @@ export async function createSubmission({ year, title, artist, story, submitterNa
     submitterName,
     uid,
     visible: true,
-    createdAt: serverTimestamp(),
+    createdAt: now,
+    updatedAt: now,
   });
 
   // Only write to user_profiles when an email was provided
@@ -93,7 +95,7 @@ export function subscribeUserSubmissions(uid, onChange, onError) {
  * Immutable fields (uid, visible, promoted, createdAt) are not touched here.
  */
 export async function updateOwnSubmission(id, { year, title, artist, story, submitterName }) {
-  await updateDoc(doc(db, 'submissions', id), { year, title, artist, story, submitterName });
+  await updateDoc(doc(db, 'submissions', id), { year, title, artist, story, submitterName, updatedAt: serverTimestamp() });
 }
 
 /**

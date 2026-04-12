@@ -51,7 +51,7 @@ service cloud.firestore {
         // Visitors cannot self-promote — only admins can set this via update
         && !('promoted' in request.resource.data)
         // Required fields must be present
-        && request.resource.data.keys().hasAll(['year', 'title', 'artist', 'story', 'submitterName', 'uid', 'createdAt', 'visible'])
+        && request.resource.data.keys().hasAll(['year', 'title', 'artist', 'story', 'submitterName', 'uid', 'createdAt', 'updatedAt', 'visible'])
         // New submissions must default to visible
         && request.resource.data.visible == true;
 
@@ -64,6 +64,9 @@ service cloud.firestore {
         && request.resource.data.visible == resource.data.visible
         && request.resource.data.promoted == resource.data.get(['promoted'], false)
         && request.resource.data.createdAt == resource.data.createdAt
+        // updatedAt must be present and must differ from the stored value (i.e. refreshed)
+        && 'updatedAt' in request.resource.data
+        && request.resource.data.updatedAt != resource.data.updatedAt
         // Year must stay in valid range
         && request.resource.data.year >= 2001
         && request.resource.data.year <= currentYear()

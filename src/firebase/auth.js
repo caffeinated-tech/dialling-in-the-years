@@ -3,12 +3,10 @@ import {
   browserSessionPersistence,
   setPersistence,
   linkWithCredential,
-  linkWithPopup,
   signInWithCredential,
   signInWithEmailLink,
   sendSignInLinkToEmail,
   isSignInWithEmailLink,
-  GoogleAuthProvider,
   EmailAuthProvider,
   signOut,
 } from 'firebase/auth';
@@ -98,24 +96,6 @@ export async function completeEmailLinkSignIn(url) {
   return { user, previousAnonymousUid, needsEmail: false };
 }
 
-/**
- * Link the current anonymous user to a Google account via popup.
- * If the Google account is already in use, falls back to signing in.
- */
-export async function linkWithGoogle() {
-  const provider = new GoogleAuthProvider();
-  try {
-    const result = await linkWithPopup(auth.currentUser, provider);
-    return { user: result.user };
-  } catch (err) {
-    if (err.code === 'auth/credential-already-in-use' || err.code === 'auth/email-already-in-use') {
-      const credential = GoogleAuthProvider.credentialFromError(err);
-      const result = await signInWithCredential(auth, credential);
-      return { user: result.user };
-    }
-    throw err;
-  }
-}
 
 export async function signOutUser() {
   await signOut(auth);

@@ -1,11 +1,9 @@
 import { useState, useEffect } from 'react';
-import { signOut } from 'firebase/auth';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { Star } from 'lucide-react';
 import { toast } from 'sonner';
-import { auth } from '@/firebase/config';
 import { useAuth } from '@/hooks/useAuth';
 import {
   subscribeAllSubmissions,
@@ -499,18 +497,11 @@ function CuratedTab() {
 export default function Admin() {
   const { user } = useAuth();
 
-  async function handleSignOut() {
-    await signOut(auth);
-  }
-
   return (
     <main className="max-w-6xl mx-auto px-4 py-8">
-      <div className="flex items-center justify-between mb-6">
-        <div>
-          <h1 className="text-2xl font-bold">Curator panel</h1>
-          <p className="text-muted-foreground text-sm">{user?.email}</p>
-        </div>
-        <Button variant="outline" onClick={handleSignOut}>Sign out</Button>
+      <div className="mb-6">
+        <h1 className="text-2xl font-bold">Curator panel</h1>
+        <p className="text-muted-foreground text-sm">{user?.email}</p>
       </div>
 
       <Separator className="mb-6" />
