@@ -117,36 +117,64 @@ function AddCuratedForm({ onDone }) {
   );
 }
 
-// ─── Edit story dialog ────────────────────────────────────────────────────────
+// ─── Edit song dialog (title, artist, story) ─────────────────────────────────
 
-function EditStoryDialog({ open, onClose, currentStory, onSave }) {
-  const [value, setValue] = useState(currentStory ?? '');
-  const [saving, setSaving] = useState(false);
+const editSchema = z.object({
+  title: z.string().min(1, 'Required').max(200),
+  artist: z.string().min(1, 'Required').max(200),
+  story: z.string().min(1, 'Required').max(2000),
+});
 
-  useEffect(() => { setValue(currentStory ?? ''); }, [currentStory]);
+function EditSongDialog({ open, onClose, song, onSave }) {
+  const form = useForm({
+    resolver: zodResolver(editSchema),
+    values: {
+      title: song?.title ?? '',
+      artist: song?.artist ?? '',
+      story: song?.story ?? '',
+    },
+  });
 
-  async function handleSave() {
-    setSaving(true);
-    await onSave(value);
-    setSaving(false);
+  async function handleSave(values) {
+    await onSave(values);
     onClose();
   }
 
   return (
     <Dialog open={open} onOpenChange={(o) => !o && onClose()}>
       <DialogContent>
-        <DialogHeader><DialogTitle>Edit story</DialogTitle></DialogHeader>
-        <Textarea
-          value={value}
-          onChange={(e) => setValue(e.target.value)}
-          className="min-h-36 resize-none"
-        />
-        <div className="flex gap-2 justify-end mt-2">
-          <Button variant="outline" onClick={onClose}>Cancel</Button>
-          <Button onClick={handleSave} disabled={saving}>
-            {saving ? 'Saving…' : 'Save'}
-          </Button>
-        </div>
+        <DialogHeader><DialogTitle>Edit song</DialogTitle></DialogHeader>
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(handleSave)} className="flex flex-col gap-4 mt-2">
+            <FormField control={form.control} name="title" render={({ field }) => (
+              <FormItem>
+                <FormLabel>Title</FormLabel>
+                <FormControl><Input {...field} /></FormControl>
+                <FormMessage />
+              </FormItem>
+            )} />
+            <FormField control={form.control} name="artist" render={({ field }) => (
+              <FormItem>
+                <FormLabel>Artist</FormLabel>
+                <FormControl><Input {...field} /></FormControl>
+                <FormMessage />
+              </FormItem>
+            )} />
+            <FormField control={form.control} name="story" render={({ field }) => (
+              <FormItem>
+                <FormLabel>Story</FormLabel>
+                <FormControl><Textarea className="min-h-32 resize-none" {...field} /></FormControl>
+                <FormMessage />
+              </FormItem>
+            )} />
+            <div className="flex gap-2 justify-end">
+              <Button type="button" variant="outline" onClick={onClose}>Cancel</Button>
+              <Button type="submit" disabled={form.formState.isSubmitting}>
+                {form.formState.isSubmitting ? 'Saving…' : 'Save'}
+              </Button>
+            </div>
+          </form>
+        </Form>
       </DialogContent>
     </Dialog>
   );
@@ -217,12 +245,12 @@ function SubmissionsTab() {
     setDeleteTarget(null);
   }
 
-  async function handleSaveStory(id, story) {
+  async function handleSave(id, values) {
     try {
-      await updateSubmission(id, { story });
-      toast.success('Story updated.');
+      await updateSubmission(id, values);
+      toast.success('Submission updated.');
     } catch {
-      toast.error('Failed to update story.');
+      toast.error('Failed to update submission.');
     }
   }
 
@@ -288,11 +316,11 @@ function SubmissionsTab() {
         </Table>
       </div>
 
-      <EditStoryDialog
+      <EditSongDialog
         open={!!editTarget}
         onClose={() => setEditTarget(null)}
-        currentStory={editTarget?.story}
-        onSave={(story) => handleSaveStory(editTarget.id, story)}
+        song={editTarget}
+        onSave={(values) => handleSave(editTarget.id, values)}
       />
       <DeleteDialog
         open={!!deleteTarget}
@@ -338,12 +366,12 @@ function CuratedTab() {
     setDeleteTarget(null);
   }
 
-  async function handleSaveStory(id, story) {
+  async function handleSave(id, values) {
     try {
-      await updateCuratedSong(id, { story });
-      toast.success('Notes updated.');
+      await updateCuratedSong(id, values);
+      toast.success('Song updated.');
     } catch {
-      toast.error('Failed to update notes.');
+      toast.error('Failed to update song.');
     }
   }
 
@@ -386,7 +414,7 @@ function CuratedTab() {
                 <TableCell className="text-right">
                   <div className="flex gap-1 justify-end">
                     <Button size="sm" variant="ghost" onClick={() => setEditTarget(song)}>
-                      Edit notes
+                      Edit
                     </Button>
                     <Button size="sm" variant="ghost" onClick={() => toggleVisible(song)}>
                       {song.visible ? 'Hide' : 'Show'}
@@ -415,11 +443,11 @@ function CuratedTab() {
         </DialogContent>
       </Dialog>
 
-      <EditStoryDialog
+      <EditSongDialog
         open={!!editTarget}
         onClose={() => setEditTarget(null)}
-        currentStory={editTarget?.story}
-        onSave={(story) => handleSaveStory(editTarget.id, story)}
+        song={editTarget}
+        onSave={(values) => handleSave(editTarget.id, values)}
       />
       <DeleteDialog
         open={!!deleteTarget}
