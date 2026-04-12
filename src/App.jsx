@@ -50,10 +50,14 @@ function EmailLinkHandler() {
   }, []);
 
   async function finish(user, previousAnonymousUid) {
-    await linkUserProfile(user.uid, previousAnonymousUid);
+    // Only update user_profiles when completing an account-linking flow
+    // (i.e. a visitor who submitted anonymously). Plain admin sign-ins skip this.
+    if (previousAnonymousUid) {
+      await linkUserProfile(user.uid, previousAnonymousUid);
+      toast.success('Account linked — your submission is saved to your account.');
+    }
     // Remove the Firebase link params from the URL without a page reload
     window.history.replaceState(null, '', window.location.pathname);
-    toast.success('Account linked — your submission is saved to your account.');
   }
 
   async function handleEmailSubmit() {
