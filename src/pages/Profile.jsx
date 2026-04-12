@@ -6,6 +6,7 @@ import { z } from 'zod';
 import { updateProfile, signOut } from 'firebase/auth';
 import { toast } from 'sonner';
 import { auth } from '@/firebase/config';
+import { updateSubmitterName } from '@/firebase/firestore';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Separator } from '@/components/ui/separator';
@@ -32,7 +33,7 @@ export default function Profile() {
   async function onSubmit(values) {
     try {
       await updateProfile(auth.currentUser, { displayName: values.displayName });
-      // Force a re-read so state reflects the update
+      await updateSubmitterName(auth.currentUser.uid, values.displayName);
       setUser({ ...auth.currentUser });
       toast.success('Name updated.');
     } catch {

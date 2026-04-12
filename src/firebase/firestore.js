@@ -4,6 +4,8 @@ import {
   where,
   orderBy,
   onSnapshot,
+  getDocs,
+  getDoc,
   addDoc,
   updateDoc,
   setDoc,
@@ -96,6 +98,42 @@ export function subscribeUserSubmissions(uid, onChange, onError) {
  */
 export async function updateOwnSubmission(id, { year, title, artist, story, submitterName }) {
   await updateDoc(doc(db, 'submissions', id), { year, title, artist, story, submitterName, updatedAt: serverTimestamp() });
+}
+
+/**
+ * Update submitterName on all submissions and curated songs belonging to uid.
+ * Called when the user changes their display name on the profile page.
+ *
+ * Curated songs promoted before the `uid` field was introduced won't appear in
+ * the uid-based query, so we also do a year-based lookup for any promoted
+ * submissions and backfill `uid` on those legacy documents at the same time.
+ */
+export async function updateSubmitterName(uid, submitterName) {
+  // 1. All submissions for this user
+  const subSnap = await getDocs(query(collection(db, 'submissions'), where('uid', '==', uid)));
+
+  // 2. Curated songs that already have this user's uid
+  const curatedByUid = await getDocs(query(collection(db, 'curated_songs'), where('uid', '==', uid)));
+  const curatedIds = new Set(curatedByUid.docs.map((d) => d.id));
+
+  // 3. Curated songs for promoted submissions that predate the uid field
+  const promotedYears = subSnap.docs
+    .filter((d) => d.data().promoted === true)
+    .map((d) => String(d.data().year))
+    .filter((year) => !curatedIds.has(year));
+
+  const legacyDocs = (
+    await Promise.all(promotedYears.map((year) => getDoc(doc(db, 'curated_songs', year))))
+  ).filter((d) => d.exists());
+
+  await Promise.all([
+    // Submissions need updatedAt to satisfy the owner-update rule
+    ...subSnap.docs.map((d) => updateDoc(d.ref, { submitterName, updatedAt: serverTimestamp() })),
+    // Curated songs with uid already stored
+    ...curatedByUid.docs.map((d) => updateDoc(d.ref, { submitterName })),
+    // Legacy curated songs — backfill uid at the same time
+    ...legacyDocs.map((d) => updateDoc(d.ref, { submitterName, uid })),
+  ]);
 }
 
 /**

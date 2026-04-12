@@ -71,8 +71,8 @@ function AddCuratedForm({ onDone }) {
       toast.success('Curated song added.');
       form.reset();
       onDone?.();
-    } catch {
-      toast.error('Failed to add song.');
+    } catch (err) {
+      toast.error(err.code === 'already-exists' ? err.message : 'Failed to add song.');
     }
   }
 
@@ -259,8 +259,8 @@ function SubmissionsTab() {
     try {
       await promoteSubmission(sub);
       toast.success(`"${sub.title}" added to curated songs.`);
-    } catch {
-      toast.error('Failed to promote submission.');
+    } catch (err) {
+      toast.error(err.code === 'already-exists' ? err.message : 'Failed to promote submission.');
     }
     setPromoteTarget(null);
   }

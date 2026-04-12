@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { auth } from '@/firebase/config';
 import { subscribeCuratedSongs, subscribeSubmissions } from '../firebase/firestore.js';
 import SongCard from '../components/SongCard.jsx';
+import CuratedSongRow from '../components/CuratedSongRow.jsx';
 import DecadeFilter from '../components/DecadeFilter.jsx';
 import { Button } from '@/components/ui/button';
 
@@ -51,6 +52,9 @@ export default function Gallery() {
         </p>
         <div className="flex flex-wrap gap-3 justify-center">
           <Button asChild size="lg">
+            <a href="#curated">Museum picks</a>
+          </Button>
+          <Button asChild size="lg" variant="outline">
             <Link to="/submit">Submit a song</Link>
           </Button>
           {user && !user.isAnonymous && (
@@ -62,7 +66,7 @@ export default function Gallery() {
       </header>
 
       {/* ── Curated songs ───────────────────────────────────────── */}
-      <section className="mb-16" aria-labelledby="curated-heading">
+      <section id="curated" className="mb-16" aria-labelledby="curated-heading">
         <div className="mb-4">
           <h2 id="curated-heading" className="text-2xl font-bold mb-1">Museum picks</h2>
           <p className="text-muted-foreground text-sm">
@@ -81,9 +85,9 @@ export default function Gallery() {
         ) : filteredCurated.length === 0 ? (
           <p className="text-muted-foreground py-8">No songs for this decade.</p>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+          <div className="border border-border rounded-lg px-3">
             {filteredCurated.map((song) => (
-              <SongCard key={song.id} song={song} />
+              <CuratedSongRow key={song.id} song={song} />
             ))}
           </div>
         )}

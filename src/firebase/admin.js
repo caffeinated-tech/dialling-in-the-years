@@ -5,7 +5,7 @@ import {
   onSnapshot,
   updateDoc,
   deleteDoc,
-  addDoc,
+  setDoc,
   getDoc,
   doc,
   serverTimestamp,
@@ -51,12 +51,19 @@ export async function deleteCuratedSong(id) {
   await deleteDoc(doc(db, 'curated_songs', id));
 }
 
-export async function addCuratedSong({ year, title, artist, story }) {
-  await addDoc(collection(db, 'curated_songs'), {
+export async function addCuratedSong({ year, title, artist, story, submitterName, uid }) {
+  const ref = doc(db, 'curated_songs', String(year));
+  const existing = await getDoc(ref);
+  if (existing.exists()) {
+    throw Object.assign(new Error(`A curated song for ${year} already exists.`), { code: 'already-exists' });
+  }
+  await setDoc(ref, {
     year,
     title,
     artist,
     story,
+    ...(submitterName ? { submitterName } : {}),
+    ...(uid ? { uid } : {}),
     visible: true,
     chosenAt: serverTimestamp(),
   });
@@ -68,7 +75,7 @@ export async function addCuratedSong({ year, title, artist, story }) {
  * original submission so it can be flagged in the gallery and admin list.
  * `promoted` can only be set via update, which is admin-only in Firestore rules.
  */
-export async function promoteSubmission({ id, year, title, artist, story }) {
-  await addCuratedSong({ year, title, artist, story });
+export async function promoteSubmission({ id, year, title, artist, story, submitterName, uid }) {
+  await addCuratedSong({ year, title, artist, story, submitterName, uid });
   await updateSubmission(id, { promoted: true });
 }

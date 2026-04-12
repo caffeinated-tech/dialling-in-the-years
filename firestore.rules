@@ -26,7 +26,20 @@ service cloud.firestore {
       allow read: if resource.data.visible == true;
       allow list: if resource.data.visible == true;
 
-      allow create, update, delete: if isAdmin();
+      // Document ID must equal the year — enforces one song per year
+      allow create: if isAdmin() && songId == string(request.resource.data.year);
+      allow update, delete: if isAdmin();
+
+      // Submitters may update their own submitterName (e.g. after a display name change).
+      // Also allows backfilling uid on legacy documents that were promoted before uid was stored.
+      allow update: if request.auth != null
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['submitterName', 'uid'])
+        && (
+          // Document already has a matching uid
+          resource.data.uid == request.auth.uid
+          // OR uid is absent and is being set to the requester's own uid for the first time
+          || (!('uid' in resource.data) && request.resource.data.uid == request.auth.uid)
+        );
 
       // Admins can read hidden songs too
       allow read: if isAdmin();
