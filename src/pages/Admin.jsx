@@ -15,6 +15,7 @@ import {
   updateCuratedSong,
   deleteCuratedSong,
   addCuratedSong,
+  promoteSubmission,
 } from '@/firebase/admin';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
@@ -208,6 +209,7 @@ function SubmissionsTab() {
   const [emails, setEmails] = useState({});   // uid → email
   const [editTarget, setEditTarget] = useState(null);
   const [deleteTarget, setDeleteTarget] = useState(null);
+  const [promoteTarget, setPromoteTarget] = useState(null);
 
   useEffect(() => {
     return subscribeAllSubmissions(setSubmissions, (err) => {
@@ -252,6 +254,16 @@ function SubmissionsTab() {
     } catch {
       toast.error('Failed to update submission.');
     }
+  }
+
+  async function handlePromote(sub) {
+    try {
+      await promoteSubmission(sub);
+      toast.success(`"${sub.title}" added to curated songs.`);
+    } catch {
+      toast.error('Failed to promote submission.');
+    }
+    setPromoteTarget(null);
   }
 
   return (
@@ -300,6 +312,9 @@ function SubmissionsTab() {
                     <Button size="sm" variant="ghost" onClick={() => toggleVisible(sub)}>
                       {sub.visible ? 'Hide' : 'Show'}
                     </Button>
+                    <Button size="sm" variant="ghost" onClick={() => setPromoteTarget(sub)}>
+                      Promote
+                    </Button>
                     <Button
                       size="sm"
                       variant="ghost"
@@ -328,6 +343,20 @@ function SubmissionsTab() {
         onConfirm={() => handleDelete(deleteTarget.id)}
         label={`"${deleteTarget?.title}"`}
       />
+      <AlertDialog open={!!promoteTarget} onOpenChange={(o) => !o && setPromoteTarget(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Promote to curated song?</AlertDialogTitle>
+            <AlertDialogDescription>
+              <strong>"{promoteTarget?.title}"</strong> by {promoteTarget?.artist} ({promoteTarget?.year}) will be added to the museum picks. The original submission will not be changed.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => setPromoteTarget(null)}>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={() => handlePromote(promoteTarget)}>Promote</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

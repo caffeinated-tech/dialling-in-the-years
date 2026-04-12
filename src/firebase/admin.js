@@ -61,3 +61,13 @@ export async function addCuratedSong({ year, title, artist, story }) {
     chosenAt: serverTimestamp(),
   });
 }
+
+/**
+ * Promote a visitor submission to a curated song.
+ * Creates a new curated_songs document from the submission's data.
+ * The original submission is left untouched — the admin can hide or delete
+ * it separately if needed.
+ */
+export async function promoteSubmission({ year, title, artist, story }) {
+  await addCuratedSong({ year, title, artist, story });
+}
