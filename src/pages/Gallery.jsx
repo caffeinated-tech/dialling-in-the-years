@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import { auth } from '@/firebase/config';
 import { subscribeCuratedSongs, subscribeSubmissions } from '../firebase/firestore.js';
 import SongCard from '../components/SongCard.jsx';
 import DecadeFilter from '../components/DecadeFilter.jsx';
@@ -11,6 +12,9 @@ export default function Gallery() {
   const [curatedDecade, setCuratedDecade] = useState(null);
   const [submissionsDecade, setSubmissionsDecade] = useState(null);
   const [error, setError] = useState(null);
+  const [user, setUser] = useState(auth.currentUser);
+
+  useEffect(() => auth.onAuthStateChanged(setUser), []);
 
   useEffect(() => {
     const unsub1 = subscribeCuratedSongs(setCurated, setError);
@@ -45,9 +49,16 @@ export default function Gallery() {
         <p className="text-muted-foreground text-lg mb-6">
           A song for every year, chosen by the museum and by you.
         </p>
-        <Button asChild size="lg">
-          <Link to="/submit">Submit a song</Link>
-        </Button>
+        <div className="flex flex-wrap gap-3 justify-center">
+          <Button asChild size="lg">
+            <Link to="/submit">Submit a song</Link>
+          </Button>
+          {user && !user.isAnonymous && (
+            <Button asChild size="lg" variant="outline">
+              <Link to="/my-submissions">Your submissions</Link>
+            </Button>
+          )}
+        </div>
       </header>
 
       {/* ── Curated songs ───────────────────────────────────────── */}

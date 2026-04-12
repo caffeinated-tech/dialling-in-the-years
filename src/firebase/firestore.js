@@ -5,6 +5,7 @@ import {
   orderBy,
   onSnapshot,
   addDoc,
+  updateDoc,
   setDoc,
   doc,
   serverTimestamp,
@@ -68,6 +69,29 @@ export async function createSubmission({ year, title, artist, story, submitterNa
     { email, isAnonymous, createdAt: serverTimestamp() },
     { merge: true }
   );
+}
+
+/**
+ * Subscribe to all submissions belonging to the given UID, sorted by year.
+ * Uses the owner read rule — works even for hidden submissions.
+ */
+export function subscribeUserSubmissions(uid, onChange, onError) {
+  const q = query(
+    collection(db, 'submissions'),
+    where('uid', '==', uid),
+    orderBy('year', 'asc')
+  );
+  return onSnapshot(q, (snap) => {
+    onChange(snap.docs.map((d) => ({ id: d.id, ...d.data() })));
+  }, onError);
+}
+
+/**
+ * Update editable fields on the user's own submission.
+ * Immutable fields (uid, visible, promoted, createdAt) are not touched here.
+ */
+export async function updateOwnSubmission(id, { year, title, artist, story, submitterName }) {
+  await updateDoc(doc(db, 'submissions', id), { year, title, artist, story, submitterName });
 }
 
 /**

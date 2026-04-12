@@ -120,6 +120,11 @@ export default function Submit() {
         </p>
         <div className="flex flex-col sm:flex-row gap-3 justify-center">
           <Button onClick={() => setNudgeOpen(true)}>Save your account</Button>
+          {user && !user.isAnonymous && (
+            <Button variant="outline" asChild>
+              <Link to="/my-submissions">View your submissions</Link>
+            </Button>
+          )}
           <Button variant="outline" asChild>
             <Link to="/">Back to gallery</Link>
           </Button>

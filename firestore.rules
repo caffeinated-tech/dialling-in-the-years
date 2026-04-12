@@ -57,6 +57,22 @@ service cloud.firestore {
 
       allow update, delete: if isAdmin();
 
+      // Owners can update their own submissions but cannot touch admin-only fields
+      allow update: if isOwner(resource.data.uid)
+        // Immutable fields must not change
+        && request.resource.data.uid == resource.data.uid
+        && request.resource.data.visible == resource.data.visible
+        && request.resource.data.promoted == resource.data.get(['promoted'], false)
+        && request.resource.data.createdAt == resource.data.createdAt
+        // Year must stay in valid range
+        && request.resource.data.year >= 2001
+        && request.resource.data.year <= currentYear()
+        // Email must never appear on a submission document
+        && !('email' in request.resource.data);
+
+      // Owners can read their own submissions (including hidden ones)
+      allow read, list: if isOwner(resource.data.uid);
+
       // Admins can read hidden submissions too
       allow read: if isAdmin();
     }
