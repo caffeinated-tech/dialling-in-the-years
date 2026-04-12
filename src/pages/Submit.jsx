@@ -60,6 +60,11 @@ export default function Submit() {
     return auth.onAuthStateChanged(setUser);
   }, []);
 
+  // Pre-fill email from Firebase Auth when a verified user is signed in
+  useEffect(() => {
+    if (user?.email) form.setValue('email', user.email);
+  }, [user?.email]);
+
   // Kiosk reset: sign out anonymous user after 5 min idle, or on "Done" press
   const { resetSession } = useKioskReset(user?.isAnonymous, () => navigate('/'));
 
@@ -258,9 +263,19 @@ export default function Submit() {
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Your email</FormLabel>
-                <FormControl><Input type="email" autoComplete="email" placeholder="you@example.com" {...field} /></FormControl>
+                <FormControl>
+                  <Input
+                    type="email"
+                    autoComplete="email"
+                    placeholder="you@example.com"
+                    disabled={!!user?.email}
+                    {...field}
+                  />
+                </FormControl>
                 <FormDescription>
-                  Private — never shown publicly. Used only if you request deletion of your data.
+                  {user?.email
+                    ? 'Using the email address from your account.'
+                    : 'Private — never shown publicly. Used only if you request deletion of your data.'}
                 </FormDescription>
                 <FormMessage />
               </FormItem>
