@@ -12,39 +12,40 @@ import {
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from '@/components/ui/form';
-import { Separator } from '@/components/ui/separator';
-import { linkWithEmail, linkWithGoogle } from '@/firebase/auth';
+import { sendEmailLink, linkWithGoogle } from '@/firebase/auth';
 import { linkUserProfile } from '@/firebase/firestore';
 
 const schema = z.object({
   email: z.string().email('Enter a valid email address'),
-  password: z.string().min(6, 'Password must be at least 6 characters'),
 });
 
 /**
  * Post-submission nudge: offer the visitor the option to create an account
  * so they can track their submissions. Shown as a dismissible dialog.
  *
+ * Email linking uses a magic link (passwordless): the user enters their email,
+ * receives a sign-in link, and the account is linked when they click it.
+ * The completion is handled in App.jsx via completeEmailLinkSignIn.
+ *
  * @param {boolean} open
  * @param {function} onClose
  * @param {string} anonymousUid - UID before linking, so we can update user_profiles
  */
 export default function AccountNudge({ open, onClose, anonymousUid }) {
-  const [view, setView] = useState('prompt'); // 'prompt' | 'email' | 'done' | 'error'
+  const [view, setView] = useState('prompt'); // 'prompt' | 'email' | 'sent' | 'error'
   const [errorMsg, setErrorMsg] = useState('');
 
   const form = useForm({
     resolver: zodResolver(schema),
-    defaultValues: { email: '', password: '' },
+    defaultValues: { email: '' },
   });
 
-  async function handleEmailLink(values) {
+  async function handleSendLink(values) {
     try {
-      const { user } = await linkWithEmail(values.email, values.password);
-      await linkUserProfile(user.uid, anonymousUid);
-      setView('done');
+      await sendEmailLink(values.email, anonymousUid);
+      setView('sent');
     } catch (err) {
-      setErrorMsg(err.message ?? 'Something went wrong. Please try again.');
+      setErrorMsg(err.message ?? 'Could not send the link. Please try again.');
       setView('error');
     }
   }
@@ -77,8 +78,8 @@ export default function AccountNudge({ open, onClose, anonymousUid }) {
             <DialogHeader>
               <DialogTitle>Save your submission</DialogTitle>
               <DialogDescription>
-                Create a free account to track your submissions and edit them later.
-                You can skip this — your submission is already saved.
+                Create a free account to track your submissions.
+                Your submission is already saved — this is optional.
               </DialogDescription>
             </DialogHeader>
             <div className="flex flex-col gap-3 mt-2">
@@ -98,37 +99,28 @@ export default function AccountNudge({ open, onClose, anonymousUid }) {
         {view === 'email' && (
           <>
             <DialogHeader>
-              <DialogTitle>Create an account</DialogTitle>
+              <DialogTitle>Sign in with email</DialogTitle>
               <DialogDescription>
-                Choose a password to link your submission to an account.
+                Enter your email and we'll send you a sign-in link — no password needed.
               </DialogDescription>
             </DialogHeader>
             <Form {...form}>
-              <form onSubmit={form.handleSubmit(handleEmailLink)} className="flex flex-col gap-4 mt-2">
+              <form onSubmit={form.handleSubmit(handleSendLink)} className="flex flex-col gap-4 mt-2">
                 <FormField
                   control={form.control}
                   name="email"
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Email</FormLabel>
-                      <FormControl><Input type="email" autoComplete="email" {...field} /></FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="password"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Password</FormLabel>
-                      <FormControl><Input type="password" autoComplete="new-password" {...field} /></FormControl>
+                      <FormControl>
+                        <Input type="email" autoComplete="email" placeholder="you@example.com" {...field} />
+                      </FormControl>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
                 <Button type="submit" disabled={form.formState.isSubmitting} className="w-full">
-                  {form.formState.isSubmitting ? 'Creating account…' : 'Create account'}
+                  {form.formState.isSubmitting ? 'Sending…' : 'Send sign-in link'}
                 </Button>
                 <Button type="button" variant="ghost" onClick={() => setView('prompt')} className="w-full text-muted-foreground">
                   Back
@@ -138,10 +130,29 @@ export default function AccountNudge({ open, onClose, anonymousUid }) {
           </>
         )}
 
+        {view === 'sent' && (
+          <>
+            <DialogHeader>
+              <DialogTitle>Check your email</DialogTitle>
+              <DialogDescription>
+                We've sent a sign-in link to{' '}
+                <strong>{form.getValues('email')}</strong>.
+                Click it to link your submission to your account.
+              </DialogDescription>
+            </DialogHeader>
+            <p className="text-muted-foreground text-xs mt-2">
+              The link works on any device. You can close this dialog.
+            </p>
+            <Button onClick={handleClose} variant="outline" className="w-full mt-2">
+              Close
+            </Button>
+          </>
+        )}
+
         {view === 'done' && (
           <>
             <DialogHeader>
-              <DialogTitle>Account created</DialogTitle>
+              <DialogTitle>Account linked</DialogTitle>
               <DialogDescription>
                 Your submission is now linked to your account.
               </DialogDescription>
