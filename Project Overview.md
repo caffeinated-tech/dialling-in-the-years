@@ -19,7 +19,7 @@ The app must be **lightweight, low-cost, low-maintenance**, and easy for future 
 |---|---|---|
 | Frontend | React 18 + Vite | Large developer pool, fast builds, easy to hand over |
 | Routing | React Router v6 | Stable API, well understood |
-| Styling | Plain CSS | More durable than UI libraries for a long-lived project |
+| Styling | Tailwind CSS + shadcn/ui | Utility-first CSS; shadcn components are copied into the repo (not an npm dependency) so there is no upstream churn risk |
 | Database | Firebase Firestore | Serverless, scales to zero cost, no server to maintain |
 | Auth | Firebase Auth | Anonymous + email/password + Google sign-in |
 | Hosting | Firebase Hosting | Free tier covers low-traffic museum site |
@@ -41,7 +41,7 @@ Commit a `.env.example` with these keys and empty values. Never commit a `.env` 
 
 ### Do not add
 - State management libraries (Redux, Zustand) — React state + Firestore listeners is sufficient
-- Component libraries (MUI, Chakra) — adds churn and weight
+- Component libraries (MUI, Chakra) — adds churn and weight. shadcn/ui is used instead: components live in `src/components/ui/` and are owned by this repo
 - Firebase Cloud Functions — not needed; email notifications are handled manually by the curator
 
 ---
