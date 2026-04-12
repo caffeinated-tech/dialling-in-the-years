@@ -63,12 +63,14 @@ export async function createSubmission({ year, title, artist, story, submitterNa
     createdAt: serverTimestamp(),
   });
 
-  // Write or merge user profile — email stays here only
-  await setDoc(
-    doc(db, 'user_profiles', uid),
-    { email, isAnonymous, createdAt: serverTimestamp() },
-    { merge: true }
-  );
+  // Only write to user_profiles when an email was provided
+  if (email) {
+    await setDoc(
+      doc(db, 'user_profiles', uid),
+      { email, isAnonymous, createdAt: serverTimestamp() },
+      { merge: true }
+    );
+  }
 }
 
 /**

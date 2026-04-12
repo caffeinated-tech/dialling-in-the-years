@@ -37,7 +37,7 @@ const schema = z.object({
   artist: z.string().min(1, 'Required').max(200),
   story: z.string().min(1, 'Required').max(2000),
   submitterName: z.string().min(1, 'Required').max(100),
-  email: z.string().email('Enter a valid email address'),
+  email: z.union([z.string().email('Enter a valid email address'), z.literal('')]).optional(),
   // Honeypot — must stay empty; bots fill it in
   _hp: z.string().max(0, '').optional(),
 });
@@ -269,7 +269,7 @@ export default function Submit() {
             name="email"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Your email</FormLabel>
+                <FormLabel>Your email <span className="text-muted-foreground font-normal">(optional)</span></FormLabel>
                 <FormControl>
                   <Input
                     type="email"
@@ -282,7 +282,7 @@ export default function Submit() {
                 <FormDescription>
                   {user?.email
                     ? 'Using the email address from your account.'
-                    : 'Private — never shown publicly. Used only if you request deletion of your data.'}
+                    : 'Optional. Private — never shown publicly. Needed only if you want to edit your submission or request data deletion.'}
                 </FormDescription>
                 <FormMessage />
               </FormItem>
