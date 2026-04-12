@@ -1,0 +1,21 @@
+{
+  "indexes": [
+    {
+      "collectionGroup": "curated_songs",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "visible", "order": "ASCENDING" },
+        { "fieldPath": "chosenAt", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "submissions",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "visible", "order": "ASCENDING" },
+        { "fieldPath": "year", "order": "ASCENDING" }
+      ]
+    }
+  ],
+  "fieldOverrides": []
+}

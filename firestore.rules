@@ -1,0 +1,70 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ─── Helpers ───────────────────────────────────────────────────────────────
+
+    function isAdmin() {
+      return request.auth != null && request.auth.token.admin == true;
+    }
+
+    function isOwner(uid) {
+      return request.auth != null && request.auth.uid == uid;
+    }
+
+    // Returns the current calendar year derived from the request timestamp.
+    // Used to validate submission year server-side.
+    function currentYear() {
+      return int(request.time.toMillis() / 1000 / 60 / 60 / 24 / 365) + 1970;
+    }
+
+    // ─── curated_songs ─────────────────────────────────────────────────────────
+    // Public read (visible only). Admin write only.
+
+    match /curated_songs/{songId} {
+      allow read: if resource.data.visible == true;
+      allow list: if resource.data.visible == true;
+
+      allow create, update, delete: if isAdmin();
+
+      // Admins can read hidden songs too
+      allow read: if isAdmin();
+    }
+
+    // ─── submissions ───────────────────────────────────────────────────────────
+    // Public read (visible only). Any authenticated user (incl. anonymous) can
+    // create their own submission. Admin can update or delete.
+
+    match /submissions/{submissionId} {
+      allow read: if resource.data.visible == true;
+      allow list: if resource.data.visible == true;
+
+      allow create: if request.auth != null
+        // Submitter can only write under their own UID
+        && request.resource.data.uid == request.auth.uid
+        // Year must be in valid submission range
+        && request.resource.data.year >= 2001
+        && request.resource.data.year <= currentYear()
+        // Email must never appear on a submission document
+        && !('email' in request.resource.data)
+        // Required fields must be present
+        && request.resource.data.keys().hasAll(['year', 'title', 'artist', 'story', 'submitterName', 'uid', 'createdAt', 'visible'])
+        // New submissions must default to visible
+        && request.resource.data.visible == true;
+
+      allow update, delete: if isAdmin();
+
+      // Admins can read hidden submissions too
+      allow read: if isAdmin();
+    }
+
+    // ─── user_profiles ─────────────────────────────────────────────────────────
+    // Only the document owner or an admin can read or write. No public access.
+
+    match /user_profiles/{uid} {
+      allow read, write: if isOwner(uid) || isAdmin();
+    }
+
+  }
+}
