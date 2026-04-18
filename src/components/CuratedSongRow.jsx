@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { ChevronDown, ThumbsUp } from 'lucide-react';
+import { ChevronDown, Star, ThumbsUp } from 'lucide-react';
 
 function formatDate(timestamp) {
   if (!timestamp) return null;
@@ -21,7 +21,10 @@ export default function CuratedSongRow({ song, voteCount = 0, userVoted = false,
           <span className="text-sm font-bold text-primary tabular-nums w-10 shrink-0">
             {song.year}
           </span>
-          <span className="flex-1 min-w-0">
+          <span className="flex-1 min-w-0 flex items-center gap-1.5">
+            {song.promoted && (
+              <Star className="size-3 fill-primary text-primary shrink-0" aria-label="Museum pick" />
+            )}
             <span className="font-medium text-sm">{song.title}</span>
             <span className="text-muted-foreground text-sm"> — {song.artist}</span>
           </span>
