@@ -31,14 +31,14 @@ export function subscribeCuratedSongs(onChange, onError) {
 }
 
 /**
- * Subscribe to all visible submissions, sorted by year ascending.
+ * Subscribe to all visible submissions. Sorting and filtering are handled
+ * client-side so that vote-based sorting can work without a Firestore index.
  * Returns an unsubscribe function.
  */
 export function subscribeSubmissions(onChange, onError) {
   const q = query(
     collection(db, 'submissions'),
     where('visible', '==', true),
-    orderBy('year', 'asc')
   );
   return onSnapshot(q, (snap) => {
     onChange(snap.docs.map((d) => ({ id: d.id, ...d.data() })));
