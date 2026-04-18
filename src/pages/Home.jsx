@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom';
-import { Button } from '@/components/ui/button';
+import { buttonVariants } from '@/components/ui/button';
+import { cn } from '@/lib/utils';
 import { Phone, Music, Users } from 'lucide-react';
 
 export default function Home() {
@@ -32,24 +33,18 @@ export default function Home() {
       </div>
 
       <div className="grid sm:grid-cols-3 gap-3">
-        <Button asChild size="lg" className="w-full gap-2">
-          <Link to="/picks">
-            <Music className="size-4" />
-            Museum picks
-          </Link>
-        </Button>
-        <Button asChild size="lg" variant="outline" className="w-full gap-2">
-          <Link to="/submissions">
-            <Users className="size-4" />
-            Visitor songs
-          </Link>
-        </Button>
-        <Button asChild size="lg" variant="outline" className="w-full gap-2">
-          <Link to="/submit">
-            <Phone className="size-4" />
-            Submit a song
-          </Link>
-        </Button>
+        <Link to="/picks" className={cn(buttonVariants({ size: 'lg' }), 'w-full gap-2')}>
+          <Music className="size-4" />
+          Museum picks
+        </Link>
+        <Link to="/submissions" className={cn(buttonVariants({ size: 'lg', variant: 'outline' }), 'w-full gap-2')}>
+          <Users className="size-4" />
+          Visitor songs
+        </Link>
+        <Link to="/submit" className={cn(buttonVariants({ size: 'lg', variant: 'outline' }), 'w-full gap-2')}>
+          <Phone className="size-4" />
+          Submit a song
+        </Link>
       </div>
 
     </main>
