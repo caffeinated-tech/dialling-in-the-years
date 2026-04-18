@@ -14,7 +14,7 @@ export default function DecadeFilter({ songs, activDecade, onSelect }) {
         onClick={() => onSelect(null)}
         className={cn(
           'rounded-full text-xs',
-          activDecade === null && 'bg-primary text-primary-foreground border-primary hover:bg-primary/90 hover:text-primary-foreground'
+          activDecade === null && 'bg-primary dark:bg-primary text-primary-foreground border-primary hover:bg-primary/90 dark:hover:bg-primary/90 hover:text-primary-foreground'
         )}
       >
         All
@@ -27,7 +27,7 @@ export default function DecadeFilter({ songs, activDecade, onSelect }) {
           onClick={() => onSelect(decade)}
           className={cn(
             'rounded-full text-xs',
-            activDecade === decade && 'bg-primary text-primary-foreground border-primary hover:bg-primary/90 hover:text-primary-foreground'
+            activDecade === decade && 'bg-primary dark:bg-primary text-primary-foreground border-primary hover:bg-primary/90 dark:hover:bg-primary/90 hover:text-primary-foreground'
           )}
         >
           {decade}s

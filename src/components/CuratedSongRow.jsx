@@ -1,6 +1,12 @@
 import { useState } from 'react';
 import { ChevronDown } from 'lucide-react';
 
+function formatDate(timestamp) {
+  if (!timestamp) return null;
+  const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
+  return new Intl.DateTimeFormat('en-IE', { day: 'numeric', month: 'short', year: 'numeric' }).format(date);
+}
+
 export default function CuratedSongRow({ song }) {
   const [open, setOpen] = useState(false);
 
@@ -28,8 +34,12 @@ export default function CuratedSongRow({ song }) {
           {song.story && (
             <p className="text-sm text-muted-foreground leading-relaxed mb-2">{song.story}</p>
           )}
-          {song.submitterName && (
-            <p className="text-xs text-muted-foreground italic">Submitted by {song.submitterName}</p>
+          {(song.submitterName || song.chosenAt) && (
+            <p className="text-xs text-muted-foreground italic">
+              {song.submitterName && <>Submitted by {song.submitterName}</>}
+              {song.submitterName && song.chosenAt && ' · '}
+              {song.chosenAt && formatDate(song.chosenAt)}
+            </p>
           )}
         </div>
       )}
