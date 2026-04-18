@@ -29,10 +29,11 @@ import {
 } from '@/components/ui/form';
 
 const CURRENT_YEAR = new Date().getFullYear();
-const YEARS = Array.from({ length: CURRENT_YEAR - 2000 }, (_, i) => CURRENT_YEAR - i);
+const START_YEAR = 1955;
+const YEARS = Array.from({ length: CURRENT_YEAR - START_YEAR + 1 }, (_, i) => CURRENT_YEAR - i);
 
 const schema = z.object({
-  year: z.coerce.number().min(2001).max(CURRENT_YEAR),
+  year: z.coerce.number().min(START_YEAR).max(CURRENT_YEAR),
   title: z.string().min(1, 'Required').max(200),
   artist: z.string().min(1, 'Required').max(200),
   story: z.string().min(1, 'Required').max(2000),
@@ -157,7 +158,7 @@ export default function Submit() {
         </Button>
         <h1 className="text-3xl font-bold mb-2">Submit a song</h1>
         <p className="text-muted-foreground">
-          Tell us about a song that defined a year for you (2001–present).
+          Tell us about a song that defined a year for you (1955–present).
         </p>
       </div>
 
@@ -243,25 +244,26 @@ export default function Submit() {
             )}
           />
 
-          {/* Name */}
-          <FormField
-            control={form.control}
-            name="submitterName"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Your name</FormLabel>
-                <FormControl>
-                  <Input
-                    placeholder="How you'd like to appear in the gallery"
-                    disabled={!!user?.displayName}
-                    {...field}
-                  />
-                </FormControl>
-                <FormDescription>This will be shown publicly with your submission.</FormDescription>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+          {/* Name — hidden when the logged-in user already has a display name */}
+          {!user?.displayName && (
+            <FormField
+              control={form.control}
+              name="submitterName"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Your name</FormLabel>
+                  <FormControl>
+                    <Input
+                      placeholder="How you'd like to appear in the gallery"
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormDescription>This will be shown publicly with your submission.</FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          )}
 
           {/* Email */}
           <FormField

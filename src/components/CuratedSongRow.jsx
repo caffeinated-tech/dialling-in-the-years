@@ -60,11 +60,11 @@ export default function CuratedSongRow({ song, voteCount = 0, userVoted = false,
           {song.story && (
             <p className="text-sm text-muted-foreground leading-relaxed mb-2">{song.story}</p>
           )}
-          {(song.submitterName || song.chosenAt) && (
+          {(song.submitterName || song.chosenAt || song.createdAt) && (
             <p className="text-xs text-muted-foreground italic">
               {song.submitterName && <>Submitted by {song.submitterName}</>}
-              {song.submitterName && song.chosenAt && ' · '}
-              {song.chosenAt && formatDate(song.chosenAt)}
+              {song.submitterName && (song.chosenAt || song.createdAt) && ' · '}
+              {formatDate(song.chosenAt || song.createdAt)}
             </p>
           )}
         </div>

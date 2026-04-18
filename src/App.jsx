@@ -2,8 +2,10 @@ import { useEffect, useState } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import { Toaster } from '@/components/ui/sonner';
+import { updateProfile } from 'firebase/auth';
 import { completeEmailLinkSignIn, EMAIL_LINK_STORAGE_KEY } from '@/firebase/auth';
-import { linkUserProfile } from '@/firebase/firestore';
+import { auth } from '@/firebase/config';
+import { linkUserProfile, updateSubmitterName } from '@/firebase/firestore';
 import Home from './pages/Home.jsx';
 import MuseumPicks from './pages/MuseumPicks.jsx';
 import Submissions from './pages/Submissions.jsx';
@@ -112,10 +114,72 @@ function EmailLinkHandler() {
   );
 }
 
+/**
+ * After sign-in, if the user has no display name set, prompt them to choose one.
+ * Skips anonymous users and admin accounts (which don't submit songs).
+ */
+function UsernamePrompt() {
+  const [open, setOpen] = useState(false);
+  const [name, setName] = useState('');
+  const [busy, setBusy] = useState(false);
+
+  useEffect(() => auth.onAuthStateChanged((user) => {
+    if (user && !user.isAnonymous && !user.displayName) {
+      setOpen(true);
+    }
+  }), []);
+
+  async function handleSave() {
+    const trimmed = name.trim();
+    if (!trimmed) return;
+    setBusy(true);
+    try {
+      await updateProfile(auth.currentUser, { displayName: trimmed });
+      await updateSubmitterName(auth.currentUser.uid, trimmed);
+      setOpen(false);
+      toast.success('Name saved.');
+    } catch (err) {
+      console.error(err);
+      toast.error('Could not save your name. Please try again.');
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  return (
+    <Dialog open={open} onOpenChange={(o) => !o && setOpen(false)}>
+      <DialogContent className="max-w-sm">
+        <DialogHeader>
+          <DialogTitle>Choose a display name</DialogTitle>
+          <DialogDescription>
+            This is the name that will appear on your submissions in the gallery.
+          </DialogDescription>
+        </DialogHeader>
+        <div className="flex flex-col gap-3 mt-2">
+          <Input
+            placeholder="Your name"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            onKeyDown={(e) => e.key === 'Enter' && handleSave()}
+            autoFocus
+          />
+          <Button onClick={handleSave} disabled={busy || !name.trim()} className="w-full">
+            {busy ? 'Saving…' : 'Save'}
+          </Button>
+          <Button variant="ghost" onClick={() => setOpen(false)} className="w-full text-muted-foreground">
+            Skip for now
+          </Button>
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
 export default function App() {
   return (
     <>
       <EmailLinkHandler />
+      <UsernamePrompt />
       <Header />
       <Routes>
         <Route path="/" element={<Home />} />

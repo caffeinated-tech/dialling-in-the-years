@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { subscribeSubmissions } from '@/firebase/firestore';
-import SongCard from '@/components/SongCard';
+import CuratedSongRow from '@/components/CuratedSongRow';
 import DecadeFilter from '@/components/DecadeFilter';
 import { useVotes } from '@/hooks/useVotes';
 import { Button } from '@/components/ui/button';
@@ -23,12 +23,12 @@ export default function Submissions() {
   }
 
   return (
-    <main className="max-w-6xl mx-auto px-4 pb-16 pt-10">
+    <main className="max-w-3xl mx-auto px-4 pb-16 pt-10">
       <div className="flex items-start justify-between gap-4 mb-6">
         <div>
           <h1 className="text-3xl font-bold mb-1">Visitor submissions</h1>
           <p className="text-muted-foreground text-sm">
-            Songs submitted by visitors for years 2001 to today.
+            Songs submitted by visitors for years 1955 to today.
           </p>
         </div>
         <Button asChild size="sm" className="shrink-0">
@@ -48,12 +48,11 @@ export default function Submissions() {
       ) : filtered.length === 0 ? (
         <p className="text-muted-foreground py-8">No submissions for this decade.</p>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+        <div className="border border-border rounded-lg px-3">
           {filtered.map((song) => (
-            <SongCard
+            <CuratedSongRow
               key={song.id}
               song={song}
-              showSubmitter
               voteCount={voteCounts.get(`submissions_${song.id}`) || 0}
               userVoted={userVotes.has(`submissions_${song.id}`)}
               canVote={canVote}

@@ -41,6 +41,9 @@ service cloud.firestore {
           || (!('uid' in resource.data) && request.resource.data.uid == request.auth.uid)
         );
 
+      // Owners can read their own curated songs (e.g. to update submitterName)
+      allow read: if request.auth != null && resource.data.uid == request.auth.uid;
+
       // Admins can read hidden songs too
       allow read: if isAdmin();
     }
@@ -57,7 +60,7 @@ service cloud.firestore {
         // Submitter can only write under their own UID
         && request.resource.data.uid == request.auth.uid
         // Year must be in valid submission range
-        && request.resource.data.year >= 2001
+        && request.resource.data.year >= 1955
         && request.resource.data.year <= currentYear()
         // Email must never appear on a submission document
         && !('email' in request.resource.data)
@@ -81,7 +84,7 @@ service cloud.firestore {
         && 'updatedAt' in request.resource.data
         && request.resource.data.updatedAt != resource.data.updatedAt
         // Year must stay in valid range
-        && request.resource.data.year >= 2001
+        && request.resource.data.year >= 1955
         && request.resource.data.year <= currentYear()
         // Email must never appear on a submission document
         && !('email' in request.resource.data);
