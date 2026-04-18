@@ -17,6 +17,17 @@ import admin from 'firebase-admin';
 process.env.FIRESTORE_EMULATOR_HOST = 'localhost:8080';
 process.env.FIREBASE_AUTH_EMULATOR_HOST = 'localhost:9099';
 
+// Safety check — both vars must point to localhost so this can never
+// accidentally run against a remote Firebase project.
+const firestoreHost = process.env.FIRESTORE_EMULATOR_HOST;
+const authHost = process.env.FIREBASE_AUTH_EMULATOR_HOST;
+if (!firestoreHost.startsWith('localhost') || !authHost.startsWith('localhost')) {
+  console.error('Refusing to run: emulator hosts must be localhost.');
+  console.error(`  FIRESTORE_EMULATOR_HOST=${firestoreHost}`);
+  console.error(`  FIREBASE_AUTH_EMULATOR_HOST=${authHost}`);
+  process.exit(1);
+}
+
 admin.initializeApp({ projectId: 'galway-museum-phone-booth' });
 
 const db = admin.firestore();
@@ -91,21 +102,35 @@ async function seed() {
   const curator = await getOrCreateCurator();
   console.log(`Curator UID: ${curator.uid}`);
 
+  const now = admin.firestore.FieldValue.serverTimestamp();
   const batch = db.batch();
 
   for (const song of songs) {
-    const ref = db.collection('curated_songs').doc(String(song.year));
-    batch.set(ref, {
+    // Curated song document (keyed by year)
+    const curatedRef = db.collection('curated_songs').doc(String(song.year));
+    batch.set(curatedRef, {
       ...song,
       uid: curator.uid,
       submitterName: 'Museum Curator',
       visible: true,
-      chosenAt: admin.firestore.FieldValue.serverTimestamp(),
+      chosenAt: now,
+    });
+
+    // Corresponding submission document
+    const submissionRef = db.collection('submissions').doc();
+    batch.set(submissionRef, {
+      ...song,
+      uid: curator.uid,
+      submitterName: 'Museum Curator',
+      visible: true,
+      promoted: true,
+      createdAt: now,
+      updatedAt: now,
     });
   }
 
   await batch.commit();
-  console.log(`Seeded ${songs.length} curated songs into the emulator.`);
+  console.log(`Seeded ${songs.length} curated songs and ${songs.length} submissions into the emulator.`);
 }
 
 seed().catch((err) => {

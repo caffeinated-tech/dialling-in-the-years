@@ -23,6 +23,14 @@ import { fileURLToPath } from 'url';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
+// Safety check — refuse to run against anything other than the local emulator.
+const firestoreHost = process.env.FIRESTORE_EMULATOR_HOST ?? '';
+if (!firestoreHost.startsWith('localhost')) {
+  console.error('Refusing to run: FIRESTORE_EMULATOR_HOST must be set to a localhost address.');
+  console.error('Start the emulators and set FIRESTORE_EMULATOR_HOST=localhost:8080 before seeding.');
+  process.exit(1);
+}
+
 const serviceAccountPath = resolve(__dirname, 'serviceAccountKey.json');
 let serviceAccount;
 try {
