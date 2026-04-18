@@ -1,4 +1,4 @@
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, NavLink, useNavigate } from 'react-router-dom';
 import { signOut } from 'firebase/auth';
 import { auth } from '@/firebase/config';
 import { useAuth } from '@/hooks/useAuth';
@@ -30,6 +30,30 @@ export default function Header() {
         <Link to="/" className="font-bold text-sm tracking-tight hover:text-primary transition-colors no-underline text-foreground">
           Dialling in the Years
         </Link>
+
+        <nav className="flex items-center gap-1">
+          <NavLink
+            to="/"
+            end
+            className={({ isActive }) =>
+              `px-3 py-1.5 rounded-md text-sm transition-colors ${
+                isActive ? 'text-primary font-medium' : 'text-muted-foreground hover:text-foreground'
+              }`
+            }
+          >
+            Museum picks
+          </NavLink>
+          <NavLink
+            to="/submissions"
+            className={({ isActive }) =>
+              `px-3 py-1.5 rounded-md text-sm transition-colors ${
+                isActive ? 'text-primary font-medium' : 'text-muted-foreground hover:text-foreground'
+              }`
+            }
+          >
+            Visitor songs
+          </NavLink>
+        </nav>
 
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
