@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { Star } from 'lucide-react';
+import { ChevronDown, Star } from 'lucide-react';
 import { toast } from 'sonner';
 import { auth } from '@/firebase/config';
 import { subscribeUserSubmissions, updateOwnSubmission } from '@/firebase/firestore';
@@ -11,7 +11,6 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
-import { Card, CardContent } from '@/components/ui/card';
 import {
   Dialog,
   DialogContent,
@@ -35,10 +34,11 @@ import {
 } from '@/components/ui/form';
 
 const CURRENT_YEAR = new Date().getFullYear();
-const YEARS = Array.from({ length: CURRENT_YEAR - 2000 }, (_, i) => CURRENT_YEAR - i);
+const START_YEAR = 1955;
+const YEARS = Array.from({ length: CURRENT_YEAR - START_YEAR + 1 }, (_, i) => CURRENT_YEAR - i);
 
 const editSchema = z.object({
-  year: z.coerce.number().min(2001).max(CURRENT_YEAR),
+  year: z.coerce.number().min(START_YEAR).max(CURRENT_YEAR),
   title: z.string().min(1, 'Required').max(200),
   artist: z.string().min(1, 'Required').max(200),
   story: z.string().min(1, 'Required').max(2000),
@@ -134,6 +134,61 @@ function EditDialog({ open, onClose, submission }) {
   );
 }
 
+function SubmissionRow({ sub, onEdit }) {
+  const [open, setOpen] = useState(false);
+
+  return (
+    <div className={`border-b border-border last:border-0 ${!sub.visible ? 'opacity-60' : ''}`}>
+      <div className="flex items-center gap-4 py-3 px-1">
+        <button
+          onClick={() => setOpen((o) => !o)}
+          className="flex-1 flex items-center gap-4 text-left hover:bg-accent/50 transition-colors rounded-sm min-w-0"
+          aria-expanded={open}
+        >
+          <span className="text-sm font-bold text-primary tabular-nums w-10 shrink-0">
+            {sub.year}
+          </span>
+          <span className="flex-1 min-w-0 flex items-center gap-1.5">
+            {sub.promoted && (
+              <Star className="size-3 fill-primary text-primary shrink-0" aria-label="Museum pick" />
+            )}
+            <span className="font-medium text-sm">{sub.title}</span>
+            <span className="text-muted-foreground text-sm"> — {sub.artist}</span>
+          </span>
+        </button>
+
+        <div className="flex items-center gap-2 shrink-0">
+          {!sub.visible && (
+            <Badge variant="secondary" className="text-xs">Hidden</Badge>
+          )}
+          {sub.promoted && (
+            <Badge variant="outline" className="text-xs text-primary border-primary/40">Pick</Badge>
+          )}
+          <Button size="sm" variant="ghost" className="h-7 px-2 text-xs" onClick={onEdit}>
+            Edit
+          </Button>
+          <button
+            onClick={() => setOpen((o) => !o)}
+            aria-expanded={open}
+            aria-label={open ? 'Collapse' : 'Expand'}
+            className="text-muted-foreground hover:text-foreground transition-colors"
+          >
+            <ChevronDown className={`size-4 transition-transform duration-200 ${open ? 'rotate-180' : ''}`} />
+          </button>
+        </div>
+      </div>
+
+      {open && (
+        <div className="px-1 pb-4 pl-14">
+          {sub.story && (
+            <p className="text-sm text-muted-foreground leading-relaxed">{sub.story}</p>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
 export default function MySubmissions() {
   const [user, setUser] = useState(auth.currentUser);
   const [submissions, setSubmissions] = useState([]);
@@ -190,50 +245,9 @@ export default function MySubmissions() {
         </Button>
       )}
 
-      <div className="flex flex-col gap-3">
+      <div className="border border-border rounded-lg px-3">
         {submissions.map((sub) => (
-          <Card key={sub.id} className={!sub.visible ? 'opacity-60' : ''}>
-            <CardContent className="p-4 flex gap-4 items-start">
-              <Badge
-                variant="outline"
-                className="shrink-0 text-base font-extrabold text-primary border-primary/40 px-2 py-0.5 tracking-tight"
-              >
-                {sub.year}
-              </Badge>
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-1.5 mb-0.5">
-                  {sub.promoted && (
-                    <Star className="size-3.5 fill-primary text-primary shrink-0" aria-label="Promoted to museum pick" />
-                  )}
-                  <p className="font-bold text-sm truncate">{sub.title}</p>
-                </div>
-                <p className="text-muted-foreground text-xs mb-2">{sub.artist}</p>
-                {sub.story && (
-                  <p className="text-muted-foreground text-xs leading-relaxed line-clamp-3">
-                    {sub.story}
-                  </p>
-                )}
-                <div className="flex items-center gap-2 mt-3">
-                  {!sub.visible && (
-                    <Badge variant="secondary" className="text-xs">Hidden by curator</Badge>
-                  )}
-                  {sub.promoted && (
-                    <Badge variant="outline" className="text-xs text-primary border-primary/40">
-                      Museum pick
-                    </Badge>
-                  )}
-                </div>
-              </div>
-              <Button
-                size="sm"
-                variant="ghost"
-                className="shrink-0"
-                onClick={() => setEditTarget(sub)}
-              >
-                Edit
-              </Button>
-            </CardContent>
-          </Card>
+          <SubmissionRow key={sub.id} sub={sub} onEdit={() => setEditTarget(sub)} />
         ))}
       </div>
 
