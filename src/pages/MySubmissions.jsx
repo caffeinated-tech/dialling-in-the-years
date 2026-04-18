@@ -235,14 +235,12 @@ export default function MySubmissions() {
         </p>
       </div>
 
+      <Button asChild size="lg" className="w-full mb-8">
+        <Link to="/submit">+ Add a submission</Link>
+      </Button>
+
       {loading && (
         <p className="text-muted-foreground">Loading…</p>
-      )}
-
-      {!loading && submissions.length === 0 && (
-        <Button asChild>
-          <Link to="/submit">Submit your first song</Link>
-        </Button>
       )}
 
       <div className="border border-border rounded-lg px-3">

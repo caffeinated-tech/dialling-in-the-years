@@ -135,6 +135,7 @@ function UsernamePrompt() {
     setBusy(true);
     try {
       await updateProfile(auth.currentUser, { displayName: trimmed });
+      await auth.currentUser.reload();
       await updateSubmitterName(auth.currentUser.uid, trimmed);
       setOpen(false);
       toast.success('Name saved.');

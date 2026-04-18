@@ -1,10 +1,11 @@
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, Navigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { toast } from 'sonner';
 import { sendEmailLink } from '@/firebase/auth';
+import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from '@/components/ui/form';
@@ -14,7 +15,10 @@ const schema = z.object({
 });
 
 export default function Login() {
+  const { user, loading } = useAuth();
   const [sent, setSent] = useState(false);
+
+  if (!loading && user && !user.isAnonymous) return <Navigate to="/profile" replace />;
 
   const form = useForm({
     resolver: zodResolver(schema),

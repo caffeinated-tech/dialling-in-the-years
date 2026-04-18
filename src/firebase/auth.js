@@ -1,5 +1,6 @@
 import {
   signInAnonymously,
+  browserLocalPersistence,
   browserSessionPersistence,
   setPersistence,
   linkWithCredential,
@@ -67,6 +68,10 @@ export async function completeEmailLinkSignIn(url) {
     // Edge case: different device — prompt is handled by the caller
     return { needsEmail: true, previousAnonymousUid };
   }
+
+  // Switch from per-tab session persistence to localStorage so the signed-in
+  // state is shared across tabs (anonymous kiosk sessions stay tab-scoped).
+  await setPersistence(auth, browserLocalPersistence);
 
   const credential = EmailAuthProvider.credentialWithLink(email, url);
   let user;
