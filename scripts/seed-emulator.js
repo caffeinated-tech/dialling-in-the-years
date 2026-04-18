@@ -15,10 +15,12 @@
 import admin from 'firebase-admin';
 
 process.env.FIRESTORE_EMULATOR_HOST = 'localhost:8080';
+process.env.FIREBASE_AUTH_EMULATOR_HOST = 'localhost:9099';
 
 admin.initializeApp({ projectId: 'galway-museum-phone-booth' });
 
 const db = admin.firestore();
+const authAdmin = admin.auth();
 
 // Song data sourced directly from arduino/dialling_in_the_years.ino.
 // Format in the .ino file is "Title - Artist"; parsed accordingly here.
@@ -71,13 +73,32 @@ const songs = [
   { year: 2000, title: "Groovejet (If This Ain't Love)",     artist: 'Spiller feat. Sophie Ellis-Bextor' },
 ];
 
+async function getOrCreateCurator() {
+  const email = 'curator@museum.local';
+  try {
+    return await authAdmin.getUserByEmail(email);
+  } catch {
+    // User doesn't exist yet — create them
+  }
+  return authAdmin.createUser({
+    email,
+    displayName: 'Museum Curator',
+    password: 'curator123',
+  });
+}
+
 async function seed() {
+  const curator = await getOrCreateCurator();
+  console.log(`Curator UID: ${curator.uid}`);
+
   const batch = db.batch();
 
   for (const song of songs) {
     const ref = db.collection('curated_songs').doc(String(song.year));
     batch.set(ref, {
       ...song,
+      uid: curator.uid,
+      submitterName: 'Museum Curator',
       visible: true,
       chosenAt: admin.firestore.FieldValue.serverTimestamp(),
     });
