@@ -93,6 +93,22 @@ service cloud.firestore {
       allow read: if isAdmin();
     }
 
+    // ─── votes ─────────────────────────────────────────────────────────────────
+    // Anyone can read (so vote counts are public).
+    // Only verified (non-anonymous) users can vote, and only under their own UID.
+    // Document ID must be {songCollection}_{songId}_{uid} to prevent duplicates.
+
+    match /votes/{voteId} {
+      allow read: if true;
+
+      allow create: if request.auth != null
+        && request.auth.token.firebase.sign_in_provider != 'anonymous'
+        && request.resource.data.uid == request.auth.uid
+        && voteId == request.resource.data.songCollection + '_' + request.resource.data.songId + '_' + request.auth.uid;
+
+      allow delete: if request.auth != null && resource.data.uid == request.auth.uid;
+    }
+
     // ─── user_profiles ─────────────────────────────────────────────────────────
     // Only the document owner or an admin can read or write. No public access.
 

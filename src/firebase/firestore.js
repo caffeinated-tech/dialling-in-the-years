@@ -9,6 +9,7 @@ import {
   addDoc,
   updateDoc,
   setDoc,
+  deleteDoc,
   doc,
   serverTimestamp,
 } from 'firebase/firestore';
@@ -134,6 +135,44 @@ export async function updateSubmitterName(uid, submitterName) {
     // Legacy curated songs — backfill uid at the same time
     ...legacyDocs.map((d) => updateDoc(d.ref, { submitterName, uid })),
   ]);
+}
+
+// ─── Votes ────────────────────────────────────────────────────────────────────
+
+/**
+ * Subscribe to all votes in real-time.
+ * Callers derive per-song counts and per-user state from the resulting array.
+ */
+export function subscribeVotes(onChange, onError) {
+  return onSnapshot(collection(db, 'votes'), (snap) => {
+    onChange(snap.docs.map((d) => ({ id: d.id, ...d.data() })));
+  }, onError);
+}
+
+/**
+ * Cast a vote for a song. The document ID encodes the voter's UID so the
+ * same user cannot vote twice for the same song.
+ *
+ * @param {string} uid
+ * @param {'curated_songs'|'submissions'} songCollection
+ * @param {string} songId
+ */
+export async function castVote(uid, songCollection, songId) {
+  const voteId = `${songCollection}_${songId}_${uid}`;
+  await setDoc(doc(db, 'votes', voteId), {
+    uid,
+    songCollection,
+    songId,
+    createdAt: serverTimestamp(),
+  });
+}
+
+/**
+ * Remove a previously cast vote.
+ */
+export async function removeVote(uid, songCollection, songId) {
+  const voteId = `${songCollection}_${songId}_${uid}`;
+  await deleteDoc(doc(db, 'votes', voteId));
 }
 
 /**

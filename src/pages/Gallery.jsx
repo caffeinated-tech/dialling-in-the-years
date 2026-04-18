@@ -1,7 +1,7 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { auth } from '@/firebase/config';
-import { subscribeCuratedSongs, subscribeSubmissions } from '../firebase/firestore.js';
+import { subscribeCuratedSongs, subscribeSubmissions, subscribeVotes, castVote, removeVote } from '../firebase/firestore.js';
 import SongCard from '../components/SongCard.jsx';
 import CuratedSongRow from '../components/CuratedSongRow.jsx';
 import DecadeFilter from '../components/DecadeFilter.jsx';
@@ -10,6 +10,7 @@ import { Button } from '@/components/ui/button';
 export default function Gallery() {
   const [curated, setCurated] = useState([]);
   const [submissions, setSubmissions] = useState([]);
+  const [votes, setVotes] = useState([]);
   const [curatedDecade, setCuratedDecade] = useState(null);
   const [submissionsDecade, setSubmissionsDecade] = useState(null);
   const [error, setError] = useState(null);
@@ -20,8 +21,39 @@ export default function Gallery() {
   useEffect(() => {
     const unsub1 = subscribeCuratedSongs(setCurated, setError);
     const unsub2 = subscribeSubmissions(setSubmissions, setError);
-    return () => { unsub1(); unsub2(); };
+    const unsub3 = subscribeVotes(setVotes, setError);
+    return () => { unsub1(); unsub2(); unsub3(); };
   }, []);
+
+  // Map of `{songCollection}_{songId}` -> vote count
+  const voteCounts = useMemo(() => {
+    const map = new Map();
+    for (const v of votes) {
+      const key = `${v.songCollection}_${v.songId}`;
+      map.set(key, (map.get(key) || 0) + 1);
+    }
+    return map;
+  }, [votes]);
+
+  // Set of song keys the current user has voted for
+  const userVotes = useMemo(() => {
+    if (!user || user.isAnonymous) return new Set();
+    return new Set(
+      votes.filter((v) => v.uid === user.uid).map((v) => `${v.songCollection}_${v.songId}`)
+    );
+  }, [votes, user]);
+
+  const canVote = !!user && !user.isAnonymous;
+
+  async function handleVote(songCollection, songId) {
+    if (!canVote) return;
+    const key = `${songCollection}_${songId}`;
+    if (userVotes.has(key)) {
+      await removeVote(user.uid, songCollection, songId);
+    } else {
+      await castVote(user.uid, songCollection, songId);
+    }
+  }
 
   const filteredCurated = curatedDecade
     ? curated.filter((s) => Math.floor(s.year / 10) * 10 === curatedDecade)
@@ -87,7 +119,14 @@ export default function Gallery() {
         ) : (
           <div className="border border-border rounded-lg px-3">
             {filteredCurated.map((song) => (
-              <CuratedSongRow key={song.id} song={song} />
+              <CuratedSongRow
+                key={song.id}
+                song={song}
+                voteCount={voteCounts.get(`curated_songs_${song.id}`) || 0}
+                userVoted={userVotes.has(`curated_songs_${song.id}`)}
+                canVote={canVote}
+                onVote={() => handleVote('curated_songs', song.id)}
+              />
             ))}
           </div>
         )}
@@ -122,7 +161,15 @@ export default function Gallery() {
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
             {filteredSubmissions.map((song) => (
-              <SongCard key={song.id} song={song} showSubmitter />
+              <SongCard
+                key={song.id}
+                song={song}
+                showSubmitter
+                voteCount={voteCounts.get(`submissions_${song.id}`) || 0}
+                userVoted={userVotes.has(`submissions_${song.id}`)}
+                canVote={canVote}
+                onVote={() => handleVote('submissions', song.id)}
+              />
             ))}
           </div>
         )}
