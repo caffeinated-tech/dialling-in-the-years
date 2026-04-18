@@ -33,8 +33,7 @@ export default function Header() {
 
         <nav className="flex items-center gap-1">
           <NavLink
-            to="/"
-            end
+            to="/picks"
             className={({ isActive }) =>
               `px-3 py-1.5 rounded-md text-sm transition-colors ${
                 isActive ? 'text-primary font-medium' : 'text-muted-foreground hover:text-foreground'

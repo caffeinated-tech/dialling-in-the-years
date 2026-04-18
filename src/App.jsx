@@ -4,6 +4,7 @@ import { toast } from 'sonner';
 import { Toaster } from '@/components/ui/sonner';
 import { completeEmailLinkSignIn, EMAIL_LINK_STORAGE_KEY } from '@/firebase/auth';
 import { linkUserProfile } from '@/firebase/firestore';
+import Home from './pages/Home.jsx';
 import MuseumPicks from './pages/MuseumPicks.jsx';
 import Submissions from './pages/Submissions.jsx';
 import Submit from './pages/Submit.jsx';
@@ -117,7 +118,8 @@ export default function App() {
       <EmailLinkHandler />
       <Header />
       <Routes>
-        <Route path="/" element={<MuseumPicks />} />
+        <Route path="/" element={<Home />} />
+        <Route path="/picks" element={<MuseumPicks />} />
         <Route path="/submissions" element={<Submissions />} />
         <Route path="/submit" element={<Submit />} />
         <Route path="/my-submissions" element={<MySubmissions />} />
