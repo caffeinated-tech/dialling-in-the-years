@@ -71,14 +71,14 @@ export default function Submissions() {
 
   return (
     <main className="max-w-3xl mx-auto px-4 pb-16 pt-10">
-      <div className="flex items-start justify-between gap-4 mb-6">
+      <div className="flex flex-col min-[400px]:flex-row min-[400px]:items-start min-[400px]:justify-between gap-3 mb-6">
         <div>
           <h1 className="text-3xl font-bold mb-1">Visitor submissions</h1>
           <p className="text-muted-foreground text-sm">
             Songs submitted by visitors for years 1955 to today.
           </p>
         </div>
-        <Button asChild size="sm" className="shrink-0">
+        <Button asChild size="sm" className="shrink-0 self-start">
           <Link to="/submit">Submit a song</Link>
         </Button>
       </div>

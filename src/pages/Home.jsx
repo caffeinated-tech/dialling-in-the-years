@@ -15,19 +15,24 @@ export default function Home() {
           A song for every year, chosen by the museum and by you.
         </p>
       </div>
-
       <div className="space-y-4 mb-12 text-muted-foreground leading-relaxed">
         <p>
-          Pick up the handset of the old rotary phone in the exhibit, dial a year between
-          1955 and 2000, and hear the song the museum has chosen to represent that moment in time.
+          At the <a href="https://ccmireland.com/" className="text-primary hover:underline">Computer and Communications Museum of Ireland, Galway</a>, we have 
+          built a very special phone booth. Using the original rotary dial phone from outside the canteen at the 
+          University of Galway.
         </p>
         <p>
-          Each song was selected by the curator to capture something of the mood, the culture,
-          or the history of its year — spanning rock and roll, folk, disco, and everything in between.
+          Unlike the other phones inside the museum, this one isn't hooked to our working local switchboard.
+          Instead, if you dial a number between 1955-2000 then a song from that year will play from the handset.
+          They have been personally selected by our museum curator Brendan Smith. He has a story to go with each of song 
+          - if you are visiting and curious, be sure to ask him about your favourites. 
         </p>
         <p>
-          Think the museum got it right? Think they missed something obvious? You can browse
-          the full list of picks, submit your own song for any year from 2001 onwards, and
+          Now we are reaching out to you to pick the songs from 2001 onwards. Tell us what song defined a year for you, 
+          share your story, and become part of the exhibition. 
+        </p> 
+        <p>
+          You can browse the full list of picks, submit your own song for any year from 2001 onwards, and
           vote for the songs you love.
         </p>
       </div>
