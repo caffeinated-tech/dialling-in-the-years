@@ -18,12 +18,12 @@ export default function Login() {
   const { user, loading } = useAuth();
   const [sent, setSent] = useState(false);
 
-  if (!loading && user && !user.isAnonymous) return <Navigate to="/profile" replace />;
-
   const form = useForm({
     resolver: zodResolver(schema),
     defaultValues: { email: '' },
   });
+
+  if (!loading && user && !user.isAnonymous) return <Navigate to="/profile" replace />;
 
   async function onSubmit(values) {
     try {
