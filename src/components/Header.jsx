@@ -4,6 +4,7 @@ import { auth } from '@/firebase/config';
 import { useAuth } from '@/hooks/useAuth';
 import { UserRound } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import Logo from '@/components/Logo';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -27,8 +28,8 @@ export default function Header() {
   return (
     <header className="sticky top-0 z-40 w-full border-b border-border bg-background/80 backdrop-blur-sm">
       <div className="max-w-6xl mx-auto px-4 h-14 flex items-center justify-between">
-        <Link to="/" className="font-bold text-sm tracking-tight hover:text-primary transition-colors no-underline text-foreground">
-          Dialling in the Years
+        <Link to="/" className="text-primary hover:opacity-80 transition-opacity">
+          <Logo className="h-8 w-auto" />
         </Link>
 
         <nav className="flex items-center gap-1">
