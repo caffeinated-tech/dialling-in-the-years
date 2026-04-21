@@ -6,11 +6,12 @@ import { useVotes } from '@/hooks/useVotes';
 
 export default function MuseumPicks() {
   const [songs, setSongs] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [decade, setDecade] = useState(null);
   const [error, setError] = useState(null);
   const { voteCounts, userVotes, canVote, handleVote } = useVotes();
 
-  useEffect(() => subscribeCuratedSongs(setSongs, setError), []);
+  useEffect(() => subscribeCuratedSongs((data) => { setSongs(data); setLoading(false); }, (err) => { setError(err); setLoading(false); }), []);
 
   const filtered = decade
     ? songs.filter((s) => Math.floor(s.year / 10) * 10 === decade)
@@ -31,7 +32,9 @@ export default function MuseumPicks() {
 
       <DecadeFilter songs={songs} activDecade={decade} onSelect={setDecade} />
 
-      {songs.length === 0 ? (
+      {loading ? (
+        <p className="text-muted-foreground py-8">Loading…</p>
+      ) : songs.length === 0 ? (
         <p className="text-muted-foreground py-8">No curated songs yet.</p>
       ) : filtered.length === 0 ? (
         <p className="text-muted-foreground py-8">No songs for this decade.</p>

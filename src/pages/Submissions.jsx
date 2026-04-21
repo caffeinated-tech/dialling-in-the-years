@@ -29,13 +29,14 @@ const SORT_OPTIONS = [
 
 export default function Submissions() {
   const [songs, setSongs] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [yearFilter, setYearFilter] = useState('');
   const [submitterFilter, setSubmitterFilter] = useState('');
   const [sort, setSort] = useState('createdAt_desc');
   const { voteCounts, userVotes, canVote, handleVote } = useVotes();
 
-  useEffect(() => subscribeSubmissions(setSongs, setError), []);
+  useEffect(() => subscribeSubmissions((data) => { setSongs(data); setLoading(false); }, (err) => { setError(err); setLoading(false); }), []);
 
   const filtered = useMemo(() => {
     let result = songs;
@@ -117,7 +118,9 @@ export default function Submissions() {
         </Select>
       </div>
 
-      {songs.length === 0 ? (
+      {loading ? (
+        <p className="text-muted-foreground py-8">Loading…</p>
+      ) : songs.length === 0 ? (
         <p className="text-muted-foreground py-8">
           No submissions yet.{' '}
           <Link to="/submit" className="text-primary underline">
