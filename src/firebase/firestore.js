@@ -56,7 +56,7 @@ export function subscribeSubmissions(onChange, onError) {
 export async function createSubmission({ year, title, artist, story, submitterName, email }, uid, isAnonymous) {
   // Write submission — no email field
   const now = serverTimestamp();
-  await addDoc(collection(db, 'submissions'), {
+  const submissionRef = await addDoc(collection(db, 'submissions'), {
     year,
     title,
     artist,
@@ -67,6 +67,17 @@ export async function createSubmission({ year, title, artist, story, submitterNa
     createdAt: now,
     updatedAt: now,
   });
+
+  // Auto-upvote for verified (non-anonymous) users
+  if (!isAnonymous) {
+    const voteId = `submissions_${submissionRef.id}_${uid}`;
+    await setDoc(doc(db, 'votes', voteId), {
+      uid,
+      songCollection: 'submissions',
+      songId: submissionRef.id,
+      createdAt: serverTimestamp(),
+    });
+  }
 
   // Only write to user_profiles when an email was provided
   if (email) {
