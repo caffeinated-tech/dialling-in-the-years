@@ -13,6 +13,7 @@
  */
 
 import admin from 'firebase-admin';
+import { FieldValue } from 'firebase-admin/firestore';
 
 process.env.FIRESTORE_EMULATOR_HOST = 'localhost:8080';
 process.env.FIREBASE_AUTH_EMULATOR_HOST = 'localhost:9099';
@@ -102,7 +103,7 @@ async function seed() {
   const curator = await getOrCreateCurator();
   console.log(`Curator UID: ${curator.uid}`);
 
-  const now = admin.firestore.FieldValue.serverTimestamp();
+  const now = FieldValue.serverTimestamp();
   const batch = db.batch();
 
   for (const song of songs) {

@@ -17,6 +17,7 @@
  */
 
 import admin from 'firebase-admin';
+import { FieldValue } from 'firebase-admin/firestore';
 import { readFileSync } from 'fs';
 import { resolve, dirname } from 'path';
 import { fileURLToPath } from 'url';
@@ -115,7 +116,7 @@ async function seed() {
     batch.set(ref, {
       ...song,
       visible: true,
-      chosenAt: admin.firestore.FieldValue.serverTimestamp(),
+      chosenAt: FieldValue.serverTimestamp(),
     });
   }
 
