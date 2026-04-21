@@ -39,7 +39,7 @@ export default function MuseumPicks() {
       ) : filtered.length === 0 ? (
         <p className="text-muted-foreground py-8">No songs for this decade.</p>
       ) : (
-        <div className="border border-border rounded-lg px-3">
+        <div className="border border-border rounded-lg">
           {filtered.map((song) => (
             <CuratedSongRow
               key={song.id}

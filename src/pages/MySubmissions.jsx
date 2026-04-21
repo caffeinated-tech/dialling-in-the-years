@@ -139,7 +139,7 @@ function SubmissionRow({ sub, onEdit }) {
 
   return (
     <div className={`border-b border-border last:border-0 ${!sub.visible ? 'opacity-60' : ''}`}>
-      <div className="flex items-center gap-4 py-3 px-1">
+      <div className="flex items-center gap-4 py-3 px-3">
         <button
           onClick={() => setOpen((o) => !o)}
           className="flex-1 flex items-center gap-4 text-left hover:bg-accent/50 transition-colors rounded-sm min-w-0"
@@ -179,7 +179,7 @@ function SubmissionRow({ sub, onEdit }) {
       </div>
 
       {open && (
-        <div className="px-1 pb-4 pl-14">
+        <div className="px-3 pb-4 pl-14">
           {sub.story && (
             <p className="text-sm text-muted-foreground leading-relaxed">{sub.story}</p>
           )}
@@ -243,7 +243,7 @@ export default function MySubmissions() {
         <p className="text-muted-foreground">Loading…</p>
       )}
 
-      <div className="border border-border rounded-lg px-3">
+      <div className="border border-border rounded-lg">
         {submissions.map((sub) => (
           <SubmissionRow key={sub.id} sub={sub} onEdit={() => setEditTarget(sub)} />
         ))}
