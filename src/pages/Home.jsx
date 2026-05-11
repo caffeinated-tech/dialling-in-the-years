@@ -11,7 +11,7 @@ export default function Home() {
       <div className="text-center mb-12">
         <Logo className="h-24 w-auto mx-auto mb-6 text-primary" />
         <h1 className="text-4xl sm:text-5xl font-bold tracking-tight mb-4">
-          Dialling in the Years
+          Phoning in the Years
         </h1>
         <p className="text-muted-foreground text-lg">
           A song for every year, chosen by the museum and by you.
