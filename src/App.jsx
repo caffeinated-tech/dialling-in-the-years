@@ -17,6 +17,7 @@ import AdminLogin from './pages/AdminLogin.jsx';
 import Admin from './pages/Admin.jsx';
 import AdminGuard from './components/AdminGuard.jsx';
 import Header from './components/Header.jsx';
+import Footer from './components/Footer.jsx';
 import {
   Dialog,
   DialogContent,
@@ -178,23 +179,26 @@ function UsernamePrompt() {
 
 export default function App() {
   return (
-    <>
+    <div className="flex flex-col min-h-screen">
       <EmailLinkHandler />
       <UsernamePrompt />
       <Header />
-      <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="/picks" element={<MuseumPicks />} />
-        <Route path="/submissions" element={<Submissions />} />
-        <Route path="/submit" element={<Submit />} />
-        <Route path="/my-submissions" element={<MySubmissions />} />
-        <Route path="/profile" element={<Profile />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/admin/login" element={<AdminLogin />} />
-        <Route path="/admin" element={<AdminGuard><Admin /></AdminGuard>} />
-        <Route path="*" element={<Navigate to="/" replace />} />
-      </Routes>
+      <main className="flex-1">
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/picks" element={<MuseumPicks />} />
+          <Route path="/submissions" element={<Submissions />} />
+          <Route path="/submit" element={<Submit />} />
+          <Route path="/my-submissions" element={<MySubmissions />} />
+          <Route path="/profile" element={<Profile />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/admin/login" element={<AdminLogin />} />
+          <Route path="/admin" element={<AdminGuard><Admin /></AdminGuard>} />
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
+      </main>
+      <Footer />
       <Toaster />
-    </>
+    </div>
   );
 }
