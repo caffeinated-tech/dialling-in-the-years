@@ -1,10 +1,16 @@
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { buttonVariants } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { Phone, Music, Users } from 'lucide-react';
 import Logo from '@/components/Logo';
+import { Dialog, DialogContent } from '@/components/ui/dialog';
+
+const photos = [1, 2, 3, 4, 5, 6].map(n => `/photos/${n}.jpeg`);
 
 export default function Home() {
+  const [selectedPhoto, setSelectedPhoto] = useState(null);
+
   return (
     <main className="max-w-2xl mx-auto px-4 pb-16 pt-16">
 
@@ -53,6 +59,39 @@ export default function Home() {
           Submit a song
         </Link>
       </div>
+
+      <div className="mt-16">
+        <div className="grid grid-cols-3 gap-2">
+          {photos.map((src) => (
+            <button
+              key={src}
+              onClick={() => setSelectedPhoto(src)}
+              className="aspect-square overflow-hidden rounded-md focus:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            >
+              <img
+                src={src}
+                alt=""
+                className="w-full h-full object-cover hover:opacity-90 transition-opacity cursor-pointer"
+              />
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <Dialog open={selectedPhoto !== null} onOpenChange={(open) => !open && setSelectedPhoto(null)}>
+        <DialogContent
+          showCloseButton
+          className="w-fit max-w-[calc(100vw-40px)] sm:max-w-[calc(100vw-40px)] max-h-[calc(100vh-40px)] p-0 overflow-hidden bg-black border-0"
+        >
+          {selectedPhoto && (
+            <img
+              src={selectedPhoto}
+              alt=""
+              className="block max-w-[calc(100vw-40px)] max-h-[calc(100vh-40px)] object-contain"
+            />
+          )}
+        </DialogContent>
+      </Dialog>
 
     </main>
   );
