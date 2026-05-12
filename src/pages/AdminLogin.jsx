@@ -45,7 +45,7 @@ export default function AdminLogin() {
       <div className="w-full max-w-sm">
         <div className="mb-8 text-center">
           <h1 className="text-2xl font-bold mb-1">Admin sign-in</h1>
-          <p className="text-muted-foreground text-sm">Dialling in the Years — curator panel</p>
+          <p className="text-muted-foreground text-sm">Phoning in the Years — curator panel</p>
         </div>
 
         {sent ? (

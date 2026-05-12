@@ -1,5 +1,5 @@
 // ------------------------------------------------------------------------------------
-// Dialling In the Years.
+// Phoning in the Years.
 // Project for Computer History Museum of Ireland Galway
 //
 //   An Arduino is connected to an old rotary dial phone to read dialled numbers and 

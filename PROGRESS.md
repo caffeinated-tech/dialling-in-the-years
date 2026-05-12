@@ -1,4 +1,4 @@
-# Dialling in the Years — Progress
+# Phoning in the Years — Progress
 
 Web app for the Computer and Communications Museum's rotary phone-booth exhibition.
 Visitors submit songs that defined a year for them; curators manage a separate picks list.
