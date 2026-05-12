@@ -1,5 +1,11 @@
 import { useEffect, useState } from 'react';
-import { Routes, Route, Navigate } from 'react-router-dom';
+import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
+
+function ScrollToTop() {
+  const { pathname } = useLocation();
+  useEffect(() => { window.scrollTo(0, 0); }, [pathname]);
+  return null;
+}
 import { toast } from 'sonner';
 import { Toaster } from '@/components/ui/sonner';
 import { updateProfile } from 'firebase/auth';
@@ -180,6 +186,7 @@ function UsernamePrompt() {
 export default function App() {
   return (
     <div className="flex flex-col min-h-screen">
+      <ScrollToTop />
       <EmailLinkHandler />
       <UsernamePrompt />
       <Header />
